@@ -21,7 +21,7 @@ fun DashboardScreen(navController: NavHostController) {
     ) {
         Text("Welcome to the Dashboard")
 
-        Spacer(modifier = Modifier.height(16.dp)) // Add some space between the text and the button
+        Spacer(modifier = Modifier.height(16.dp))
 
         Button(onClick = {
             auth.signOut()
