@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("com.google.gms.google-services")
@@ -7,6 +9,8 @@ plugins {
 android {
     namespace = "com.cs125.group50"
     compileSdk = 34
+
+    buildFeatures { buildConfig = true }
 
     defaultConfig {
         applicationId = "com.cs125.group50"
@@ -19,6 +23,15 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        fun loadProperties(): Properties {
+            val properties = Properties()
+            val propFile = file("local.properties")
+            if (propFile.exists()) {
+                propFile.inputStream().use { properties.load(it) }
+            }
+            return properties
+        }
+        buildConfigField("String", "GOOGLE_SIGN_IN_CLIENT_ID", "\"${loadProperties()["GOOGLE_SIGN_IN_CLIENT_ID"]}\"")
     }
 
     buildTypes {

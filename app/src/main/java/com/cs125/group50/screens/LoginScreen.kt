@@ -1,8 +1,11 @@
 package com.cs125.group50.screens
 
 import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -34,6 +37,7 @@ import com.cs125.group50.viewmodel.LoginViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import com.cs125.group50.BuildConfig
 
 @Composable
 fun LoginScreen(
@@ -127,9 +131,9 @@ fun GoogleSignInButton(viewModel: LoginViewModel) {
     }
 }
 
-fun googleSignIn(context: android.content.Context, launcher: androidx.activity.result.ActivityResultLauncher<android.content.Intent>) {
+fun googleSignIn(context: Context, launcher: ActivityResultLauncher<Intent>) {
     val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-        .requestIdToken("962909844029-vkogm31s6ba3u4c8fe26grtkri18deic.apps.googleusercontent.com")
+        .requestIdToken(BuildConfig.GOOGLE_SIGN_IN_CLIENT_ID)
         .requestEmail()
         .build()
     val googleSignInClient = GoogleSignIn.getClient(context, gso)
