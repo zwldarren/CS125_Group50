@@ -51,6 +51,10 @@ android {
 }
 
 dependencies {
+    val composeBom = platform("androidx.compose:compose-bom:2024.02.00")
+    implementation(composeBom)
+    debugImplementation("androidx.compose.ui:ui-tooling")
+    implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("com.firebaseui:firebase-ui-database:8.0.2")
     implementation("com.firebaseui:firebase-ui-firestore:8.0.2")
     implementation("com.firebaseui:firebase-ui-auth:8.0.2")

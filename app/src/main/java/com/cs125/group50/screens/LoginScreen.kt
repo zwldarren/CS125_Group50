@@ -1,29 +1,48 @@
 package com.cs125.group50.screens
 
+import android.app.Activity
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.cs125.group50.viewmodel.LoginViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
-import android.app.Activity
 
 @Composable
-fun LoginScreen(navController: NavHostController) {
+fun LoginScreen(
+    navController: NavHostController, viewModel: LoginViewModel = LoginViewModel()
+) {
+    val context = LocalContext.current
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    val auth = FirebaseAuth.getInstance()
-    val context = LocalContext.current
+    val loginState by viewModel.loginState.collectAsState()
 
     Column(
         modifier = Modifier
@@ -39,67 +58,72 @@ fun LoginScreen(navController: NavHostController) {
             modifier = Modifier.fillMaxWidth()
         )
 
+        Spacer(modifier = Modifier.height(8.dp))
+
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
             label = { Text("Password") },
+            visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Button(
-            onClick = {
-                auth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        navController.navigate("dashboard")
-                    } else {
-                        Toast.makeText(context, "Login failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
-                    }
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
+            onClick = { viewModel.loginWithEmail(email, password) },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = loginState !is LoginViewModel.LoginState.Loading
         ) {
-            Text("Login")
+            Text("Login/Sign up")
         }
 
         Spacer(modifier = Modifier.height(8.dp))
-
-        Button(
-            onClick = {
-                auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        navController.navigate("dashboard")
-                    } else {
-                        Toast.makeText(context, "Registration failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
-                    }
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Register")
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            HorizontalDivider(modifier = Modifier.weight(1f))
+            Text(" or ", modifier = Modifier.padding(horizontal = 4.dp))
+            HorizontalDivider(modifier = Modifier.weight(1f))
         }
-
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Google Sign-In
-        val launcher = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.StartActivityForResult()
-        ) { result ->
+        GoogleSignInButton(viewModel = viewModel)
+
+        LaunchedEffect(loginState) {
+            when (loginState) {
+                is LoginViewModel.LoginState.Success -> {
+                    navController.navigate("dashboard")
+                }
+                is LoginViewModel.LoginState.Error -> {
+                    val message = (loginState as LoginViewModel.LoginState.Error).message
+                    Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                }
+
+                else -> {}
+            }
+        }
+
+    }
+}
+
+@Composable
+fun GoogleSignInButton(viewModel: LoginViewModel) {
+    val context = LocalContext.current
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult(),
+        onResult = { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
                 try {
                     val account = task.getResult(ApiException::class.java)!!
-                    firebaseAuthWithGoogle(account.idToken!!, navController, context)
+                    viewModel.loginWithGoogle(account.idToken!!)
                 } catch (e: ApiException) {
-                    Toast.makeText(context, "Google sign-in failed: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, "Google sign in failed", Toast.LENGTH_LONG).show()
                 }
             }
-        }
+        })
 
-        Button(onClick = { googleSignIn(context, launcher) }) {
-            Text("Sign in with Google")
-        }
+    Button(onClick = { googleSignIn(context, launcher) }) {
+        Text("Sign in with Google")
     }
 }
 
@@ -111,16 +135,4 @@ fun googleSignIn(context: android.content.Context, launcher: androidx.activity.r
     val googleSignInClient = GoogleSignIn.getClient(context, gso)
     val signInIntent = googleSignInClient.signInIntent
     launcher.launch(signInIntent)
-}
-
-private fun firebaseAuthWithGoogle(idToken: String, navController: NavHostController, context: android.content.Context) {
-    val auth = FirebaseAuth.getInstance()
-    val credential = GoogleAuthProvider.getCredential(idToken, null)
-    auth.signInWithCredential(credential).addOnCompleteListener { task ->
-        if (task.isSuccessful) {
-            navController.navigate("dashboard")
-        } else {
-            Toast.makeText(context, "Firebase Auth with Google failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
-        }
-    }
 }
