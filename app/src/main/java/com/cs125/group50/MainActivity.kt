@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import com.cs125.group50.ui.theme.VitalityTrackerTheme
 import androidx.navigation.compose.rememberNavController
 import com.cs125.group50.nav.AppNavigation
+import com.google.firebase.auth.FirebaseAuth
 
 
 class MainActivity : ComponentActivity() {
