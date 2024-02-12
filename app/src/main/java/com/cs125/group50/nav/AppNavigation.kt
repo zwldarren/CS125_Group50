@@ -9,10 +9,8 @@ import com.cs125.group50.screens.LoginScreen
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun AppNavigation(navController: NavHostController) {
-    val auth = FirebaseAuth.getInstance()
-    val user = auth.currentUser
-    NavHost(navController = navController, startDestination = if (user == null) "login" else "dashboard") {
+fun AppNavigation(navController: NavHostController, isUserLoggedIn: Boolean) {
+    NavHost(navController = navController, startDestination = if (isUserLoggedIn) "dashboard" else "login") {
         composable("login") { LoginScreen(navController) }
         composable("dashboard") { DashboardScreen(navController) }
     }

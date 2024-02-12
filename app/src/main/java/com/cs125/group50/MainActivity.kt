@@ -15,14 +15,20 @@ import com.cs125.group50.nav.AppNavigation
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            VitalityTrackerTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    val navController = rememberNavController()
-                    AppNavigation(navController)
+        val auth = FirebaseAuth.getInstance()
+
+        auth.addAuthStateListener { firebaseAuth ->
+            val user = firebaseAuth.currentUser
+            setContent {
+                VitalityTrackerTheme {
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.background
+                    ) {
+                        val navController = rememberNavController()
+                        // AppNavigation(navController)
+                        AppNavigation(navController, isUserLoggedIn = user != null)
+                    }
                 }
             }
         }
