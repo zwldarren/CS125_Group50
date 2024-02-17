@@ -64,6 +64,9 @@ android {
 }
 
 dependencies {
+    implementation("androidx.health.connect:connect-client:1.1.0-alpha07")
+    implementation("com.google.android.gms:play-services-fitness:21.1.0")
+    implementation("com.google.android.gms:play-services-auth:21.0.0")
     implementation("androidx.compose.material3:material3-android:1.2.0")
     val composeBom = platform("androidx.compose:compose-bom:2024.02.00")
     implementation(composeBom)
