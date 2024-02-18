@@ -35,6 +35,14 @@ fun DashboardScreen(navController: NavHostController, context: Context) {
         Spacer(modifier = Modifier.height(8.dp))
 
         Button(onClick = {
+            navController.navigate("userInfoInput")
+        }) {
+            Text("Enter User Info")
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(onClick = {
             FirebaseAuth.getInstance().signOut()
             navController.navigate("login") {
                 popUpTo("login") { inclusive = true }
