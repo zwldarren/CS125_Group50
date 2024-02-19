@@ -9,6 +9,7 @@ import com.cs125.group50.screens.DashboardScreen
 import com.cs125.group50.screens.LoginScreen
 import com.cs125.group50.screens.UserInfoInputScreen
 import com.google.firebase.auth.FirebaseAuth
+import com.cs125.group50.screens.DietInputScreen
 
 @Composable
 fun AppNavigation(navController: NavHostController, isUserLoggedIn: Boolean) {
@@ -27,6 +28,15 @@ fun AppNavigation(navController: NavHostController, isUserLoggedIn: Boolean) {
         composable("userInfoInput") {
             if (userId.isNotEmpty()) {
                 UserInfoInputScreen(navController, userId)
+            } else {
+                // 处理未登录或用户ID为空的情况
+            }
+        }
+
+        // 输入饮食的界面
+        composable("dietInput") {
+            if (userId.isNotEmpty()) {
+                DietInputScreen(navController)
             } else {
                 // 处理未登录或用户ID为空的情况
             }
