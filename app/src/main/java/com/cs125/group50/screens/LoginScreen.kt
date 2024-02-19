@@ -1,8 +1,11 @@
 package com.cs125.group50.screens
 
 import android.app.Activity
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
+import android.credentials.GetCredentialException
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -26,18 +29,27 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
 import androidx.navigation.NavHostController
 import com.cs125.group50.viewmodel.LoginViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.cs125.group50.BuildConfig
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
+import kotlinx.coroutines.launch
+import java.security.MessageDigest
+import java.util.UUID
 
 @Composable
 fun LoginScreen(
@@ -110,33 +122,53 @@ fun LoginScreen(
 }
 
 @Composable
-fun GoogleSignInButton(viewModel: LoginViewModel) {
+fun GoogleSignInButton(viewModel: LoginViewModel){
     val context = LocalContext.current
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult(),
-        onResult = { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-                try {
-                    val account = task.getResult(ApiException::class.java)!!
-                    viewModel.loginWithGoogle(account.idToken!!)
-                } catch (e: ApiException) {
-                    Toast.makeText(context, "Google sign in failed", Toast.LENGTH_LONG).show()
-                }
-            }
-        })
+    val coroutineScope = rememberCoroutineScope()
 
-    Button(onClick = { googleSignIn(context, launcher) }) {
+    val rawNonce = UUID.randomUUID().toString()
+    val bytes = rawNonce.toByteArray()
+    val md = MessageDigest.getInstance("SHA-256")
+    val digest = md.digest(bytes)
+    val hashedNonce = digest.fold("") {str, it -> str + "%02x".format(it)}
+
+    val onClick:() -> Unit = {
+        val credentialManager = CredentialManager.create(context)
+
+        val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
+            .setFilterByAuthorizedAccounts(false)
+            .setServerClientId("962909844029-0rkdscnciti9l4unm59b4nms16dprb4q.apps.googleusercontent.com")
+            .setNonce(hashedNonce)
+            .build()
+
+        val request: GetCredentialRequest = GetCredentialRequest.Builder()
+            .addCredentialOption(googleIdOption)
+            .build()
+
+        coroutineScope.launch {
+            try {
+                val result = credentialManager.getCredential(
+                    request = request,
+                    context = context,
+                )
+                val credential = result.credential
+                val googleIdTokenCredential = GoogleIdTokenCredential
+                    .createFrom(credential.data)
+
+                val googleIdToken = googleIdTokenCredential.idToken
+
+                Log.i(ContentValues.TAG, googleIdToken)
+
+                Toast. makeText(context, "You are singed in!", Toast.LENGTH_SHORT).show()
+                viewModel.loginWithGoogle(googleIdToken)
+            }catch (e : GoogleIdTokenParsingException){
+                Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+            }
+
+        }
+    }
+
+    Button(onClick = onClick) {
         Text("Sign in with Google")
     }
-}
-
-fun googleSignIn(context: Context, launcher: ActivityResultLauncher<Intent>) {
-    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-        .requestIdToken(BuildConfig.GOOGLE_SIGN_IN_CLIENT_ID)
-        .requestEmail()
-        .build()
-    val googleSignInClient = GoogleSignIn.getClient(context, gso)
-    val signInIntent = googleSignInClient.signInIntent
-    launcher.launch(signInIntent)
 }

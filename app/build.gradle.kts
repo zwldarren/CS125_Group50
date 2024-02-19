@@ -64,6 +64,11 @@ android {
 }
 
 dependencies {
+    implementation("androidx.credentials:credentials:1.3.0-alpha01")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.0")
+    implementation(platform("com.google.firebase:firebase-bom:32.3.1"))
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.android.gms:play-services-auth:21.0.0")
     implementation("androidx.health.connect:connect-client:1.1.0-alpha07")
     implementation("com.google.android.gms:play-services-fitness:21.1.0")
     implementation("com.google.android.gms:play-services-auth:21.0.0")
