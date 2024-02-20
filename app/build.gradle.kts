@@ -10,7 +10,10 @@ android {
     namespace = "com.cs125.group50"
     compileSdk = 34
 
-    buildFeatures { buildConfig = true }
+    buildFeatures {
+        buildConfig = true
+        compose = true
+    }
 
     defaultConfig {
         applicationId = "com.cs125.group50"
@@ -64,6 +67,11 @@ android {
 }
 
 dependencies {
+    implementation("androidx.compose.material3:material3:1.2.0")
+    implementation("androidx.compose.material3:material3-window-size-class:1.2.0")
+    implementation("androidx.compose.material3:material3-adaptive:1.0.0-alpha06")
+    implementation("androidx.compose.material3:material3-adaptive-navigation-suite:1.0.0-alpha03")
+    implementation("androidx.health.connect:connect-client:1.0.0-alpha11")
     implementation("androidx.credentials:credentials:1.3.0-alpha01")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.0")
     implementation(platform("com.google.firebase:firebase-bom:32.3.1"))

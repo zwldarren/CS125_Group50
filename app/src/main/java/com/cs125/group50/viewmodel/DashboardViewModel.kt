@@ -1,57 +1,49 @@
 package com.cs125.group50.viewmodel
 
-import android.app.Activity
 import android.content.Context
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.health.connect.client.permission.HealthPermission
+import androidx.health.connect.client.records.HeartRateRecord
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.fitness.Fitness
-import com.google.android.gms.fitness.FitnessOptions
-import com.google.android.gms.fitness.data.DataType
-import com.google.android.gms.fitness.request.DataReadRequest
-import com.google.android.gms.tasks.Task
+import com.cs125.group50.data.HealthConnectManager
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.util.concurrent.TimeUnit
 
 
-class DashboardViewModel : ViewModel(){
-    private val fitnessOptions = FitnessOptions.builder()
-        .addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
-        .addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
-        .build()
+class DashboardViewModel(context: Context) : ViewModel() {
+    private val healthConnectManager: HealthConnectManager = HealthConnectManager(context)
+    private val requiredPermissions  = setOf(
+        HealthPermission.getReadPermission(HeartRateRecord::class),
+    )
+    val healthConnectAvailability = healthConnectManager.availability
+    var hasAllPermissions: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
-    fun connectGoogleFit(context: Context) {
+    init {
+        checkPermissions()
+    }
+
+    fun checkPermissions() {
         viewModelScope.launch {
-            val account = GoogleSignIn.getAccountForExtension(context, fitnessOptions)
-
-            if (!GoogleSignIn.hasPermissions(account, fitnessOptions)) {
-                // Request permissions
-                GoogleSignIn.requestPermissions(
-                    context as Activity,
-                    1,
-                    account,
-                    fitnessOptions
-                )
-            } else {
-                // Permissions already granted
-                accessGoogleFit(context)
-            }
+            hasAllPermissions.value = healthConnectManager.hasAllPermissions(requiredPermissions)
         }
     }
 
-    private fun accessGoogleFit(context: Context) {
-        val end = LocalDateTime.now()
-        val start = end.minusYears(1)
-        val endSeconds = end.atZone(ZoneId.systemDefault()).toEpochSecond()
-        val startSeconds = start.atZone(ZoneId.systemDefault()).toEpochSecond()
+    fun requestPermissions(permissionLauncher: ManagedActivityResultLauncher<Set<String>, Set<String>>) {
+        // This will be called from UI to request permissions
+        viewModelScope.launch {
+            healthConnectManager.checkPermissionsAndRun(requiredPermissions, permissionLauncher)
+        }
+    }
+}
 
-        val readRequest = DataReadRequest.Builder()
-            .aggregate(DataType.AGGREGATE_STEP_COUNT_DELTA)
-            .setTimeRange(startSeconds, endSeconds, TimeUnit.SECONDS)
-            .bucketByTime(1, TimeUnit.DAYS)
-            .build()
-
+class DashboardViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(DashboardViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return DashboardViewModel(context) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

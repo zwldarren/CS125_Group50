@@ -1,7 +1,16 @@
 package com.cs125.group50.screens
 
 import android.content.Context
-import androidx.compose.foundation.layout.*
+import android.content.Intent
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -12,10 +21,23 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.cs125.group50.viewmodel.DashboardViewModel
 import com.google.firebase.auth.FirebaseAuth
+import androidx.compose.runtime.collectAsState
+import androidx.health.connect.client.PermissionController
+import com.cs125.group50.data.HealthConnectAvailability
+import com.cs125.group50.viewmodel.DashboardViewModelFactory
 
 @Composable
 fun DashboardScreen(navController: NavHostController, context: Context) {
-    val dashboardViewModel = viewModel<DashboardViewModel>()
+    val factory = DashboardViewModelFactory(context)
+    val dashboardViewModel: DashboardViewModel = viewModel(factory = factory)
+
+    val hasAllPermissions = dashboardViewModel.hasAllPermissions.collectAsState()
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = PermissionController.createRequestPermissionResultContract(),
+        onResult = { _ ->
+            dashboardViewModel.checkPermissions()
+        }
+    )
 
     Column(
         modifier = Modifier
@@ -33,13 +55,38 @@ fun DashboardScreen(navController: NavHostController, context: Context) {
             .fillMaxWidth()
             .height(48.dp)
 
-        Button(
-            onClick = { dashboardViewModel.connectGoogleFit(context) },
-            modifier = buttonModifier
-        ) {
-            Text("Connect to Google Fit")
-        }
+        // if statement to check if the user has all permissions to Health Connect
+        // if not then show the button to request permissions
+        val healthConnectAvailability = dashboardViewModel.healthConnectAvailability.value
+        if (healthConnectAvailability == HealthConnectAvailability.NOT_INSTALLED) {
+            // 显示安装 Health Connect 的按钮
+            Button(
+                onClick = {
+                    // 使用 Intent 跳转到 Google Play 的 Health Connect 页面
+                    val intent = Intent(Intent.ACTION_VIEW).apply {
+                        data = Uri.parse("https://play.google.com/store/apps/details?id=com.google.android.apps.healthdata")
+                        setPackage("com.android.vending")
+                    }
+                    context.startActivity(intent)
+                },
+                modifier = buttonModifier
+            ) {
+                Text("Install Health Connect")
+            }
+        } else {
+            if (!hasAllPermissions.value) {
+                Button(
+                    onClick = {
+                        dashboardViewModel.requestPermissions(permissionLauncher)
+                    },
+                    modifier = buttonModifier
+                ) {
+                    Text("Request Permission")
+                }
 
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+        }
         Spacer(modifier = Modifier.height(8.dp))
 
         Button(
