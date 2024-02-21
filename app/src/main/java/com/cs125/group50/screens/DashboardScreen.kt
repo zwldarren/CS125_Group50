@@ -1,8 +1,6 @@
 package com.cs125.group50.screens
 
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,17 +12,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.health.connect.client.PermissionController
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.cs125.group50.viewmodel.DashboardViewModel
-import com.google.firebase.auth.FirebaseAuth
-import androidx.compose.runtime.collectAsState
-import androidx.health.connect.client.PermissionController
-import com.cs125.group50.data.HealthConnectAvailability
 import com.cs125.group50.viewmodel.DashboardViewModelFactory
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun DashboardScreen(navController: NavHostController, context: Context) {
@@ -55,38 +52,20 @@ fun DashboardScreen(navController: NavHostController, context: Context) {
             .fillMaxWidth()
             .height(48.dp)
 
-        // if statement to check if the user has all permissions to Health Connect
-        // if not then show the button to request permissions
-        val healthConnectAvailability = dashboardViewModel.healthConnectAvailability.value
-        if (healthConnectAvailability == HealthConnectAvailability.NOT_INSTALLED) {
-            // 显示安装 Health Connect 的按钮
+
+        if (!hasAllPermissions.value) {
             Button(
                 onClick = {
-                    // 使用 Intent 跳转到 Google Play 的 Health Connect 页面
-                    val intent = Intent(Intent.ACTION_VIEW).apply {
-                        data = Uri.parse("https://play.google.com/store/apps/details?id=com.google.android.apps.healthdata")
-                        setPackage("com.android.vending")
-                    }
-                    context.startActivity(intent)
+                    dashboardViewModel.requestPermissions(permissionLauncher)
                 },
                 modifier = buttonModifier
             ) {
-                Text("Install Health Connect")
+                Text("Request Permission")
             }
-        } else {
-            if (!hasAllPermissions.value) {
-                Button(
-                    onClick = {
-                        dashboardViewModel.requestPermissions(permissionLauncher)
-                    },
-                    modifier = buttonModifier
-                ) {
-                    Text("Request Permission")
-                }
 
-                Spacer(modifier = Modifier.height(8.dp))
-            }
+            Spacer(modifier = Modifier.height(8.dp))
         }
+
         Spacer(modifier = Modifier.height(8.dp))
 
         Button(

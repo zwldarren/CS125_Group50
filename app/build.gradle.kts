@@ -34,7 +34,11 @@ android {
             }
             return properties
         }
-        buildConfigField("String", "GOOGLE_SIGN_IN_CLIENT_ID", "\"${loadProperties()["GOOGLE_SIGN_IN_CLIENT_ID"]}\"")
+        buildConfigField(
+            "String",
+            "GOOGLE_SIGN_IN_CLIENT_ID",
+            "\"${loadProperties()["GOOGLE_SIGN_IN_CLIENT_ID"]}\""
+        )
     }
 
     buildTypes {
@@ -78,9 +82,9 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.android.gms:play-services-auth:21.0.0")
     implementation("androidx.health.connect:connect-client:1.1.0-alpha07")
-    implementation("com.google.android.gms:play-services-fitness:21.1.0")
     implementation("com.google.android.gms:play-services-auth:21.0.0")
     implementation("androidx.compose.material3:material3-android:1.2.0")
+    implementation("androidx.benchmark:benchmark-common:1.2.3")
     val composeBom = platform("androidx.compose:compose-bom:2024.02.00")
     implementation(composeBom)
     debugImplementation("androidx.compose.ui:ui-tooling")
@@ -100,7 +104,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
-    implementation ("androidx.navigation:navigation-compose:2.7.7")
+    implementation("androidx.navigation:navigation-compose:2.7.7")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
