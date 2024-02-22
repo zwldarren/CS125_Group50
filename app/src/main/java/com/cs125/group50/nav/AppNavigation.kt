@@ -36,7 +36,7 @@ fun AppNavigation(navController: NavHostController, isUserLoggedIn: Boolean) {
         // 输入饮食的界面
         composable("dietInput") {
             if (userId.isNotEmpty()) {
-                DietInputScreen(navController)
+                DietInputScreen(navController, userId)
             } else {
                 // 处理未登录或用户ID为空的情况
             }

@@ -18,17 +18,28 @@ import androidx.compose.foundation.clickable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cs125.group50.viewmodel.DietInputViewModel
 
-// 目前先用中文方便检查，后续修改为英文
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
+import java.util.*
+
 @Composable
-fun DietInputScreen(navController: NavHostController) {
+fun DietInputScreen(navController: NavHostController, userId: String) {
     val context = LocalContext.current
     var mealType by remember { mutableStateOf("") }
     var foodName by remember { mutableStateOf("") }
     var caloriesPerHundredGrams by remember { mutableStateOf("") }
     var foodAmount by remember { mutableStateOf("") }
-    val mealTypes = listOf("早餐", "午餐", "晚餐", "其他")
+    val mealTypes = listOf("Breakfast", "Lunch", "Dinner", "Other")
     var expanded by remember { mutableStateOf(false) }
     val viewModel: DietInputViewModel = viewModel()
+
+    var showDatePicker by remember { mutableStateOf(false) }
+    var showTimePicker by remember { mutableStateOf(false) }
+    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
+    var selectedTime by remember { mutableStateOf(LocalTime.now()) }
 
 
     Column(
@@ -42,7 +53,7 @@ fun DietInputScreen(navController: NavHostController) {
             OutlinedTextField(
                 value = mealType,
                 onValueChange = { /* ReadOnly */ },
-                label = { Text("餐饮类型") },
+                label = { Text("Meal Type") },
                 readOnly = true,
                 trailingIcon = {
                     Icon(Icons.Default.ArrowDropDown, contentDescription = "dropdown", Modifier.clickable { expanded = !expanded })
@@ -69,7 +80,7 @@ fun DietInputScreen(navController: NavHostController) {
         OutlinedTextField(
             value = foodName,
             onValueChange = { foodName = it },
-            label = { Text("食物名称") },
+            label = { Text("Food Name") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -77,7 +88,7 @@ fun DietInputScreen(navController: NavHostController) {
         OutlinedTextField(
             value = caloriesPerHundredGrams,
             onValueChange = { caloriesPerHundredGrams = it },
-            label = { Text("每百克卡路里") },
+            label = { Text("Calories per 100g") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
@@ -86,23 +97,63 @@ fun DietInputScreen(navController: NavHostController) {
         OutlinedTextField(
             value = foodAmount,
             onValueChange = { foodAmount = it },
-            label = { Text("食物单位（百克）") },
+            label = { Text("Food Amount (100g)") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
         Spacer(modifier = Modifier.height(16.dp))
 
+        TextButton(onClick = { showDatePicker = true }) {
+            Text(text = "Select Date: ${selectedDate.format(DateTimeFormatter.ISO_LOCAL_DATE)}")
+        }
+
+        // Button to show the time picker
+        TextButton(onClick = { showTimePicker = true }) {
+            Text(text = "Select Time: ${selectedTime.format(DateTimeFormatter.ISO_LOCAL_TIME)}")
+        }
+
+        if (showDatePicker) {
+            val calendar = Calendar.getInstance()
+            DatePickerDialog(
+                context,
+                { _, year, month, dayOfMonth ->
+                    selectedDate = LocalDate.of(year, month + 1, dayOfMonth)
+                    showDatePicker = false
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+            ).show()
+            showDatePicker = false
+        }
+
+        // Show the time picker dialog
+        if (showTimePicker) {
+            val calendar = Calendar.getInstance()
+            TimePickerDialog(
+                context,
+                { _, hour, minute ->
+                    selectedTime = LocalTime.of(hour, minute)
+                    showTimePicker = false
+                },
+                calendar.get(Calendar.HOUR_OF_DAY),
+                calendar.get(Calendar.MINUTE),
+                true // 24 hour time
+            ).show()
+            showTimePicker = false
+        }
+
         Button(
             onClick = {
                 // 调用ViewModel来显示饮食信息，后续确定饮食相关的数据库结构后会修改成提示输入成功
-                viewModel.showDietInfo(mealType, foodName, caloriesPerHundredGrams, foodAmount) { info ->
-                    Toast.makeText(context, info, Toast.LENGTH_LONG).show()
-                }
+                viewModel.saveDietInfo(userId, mealType, foodName, caloriesPerHundredGrams, foodAmount, selectedDate, selectedTime)
+                navController.popBackStack()
+
             },
             // 检查所有字段是否填写
             enabled = mealType.isNotEmpty() && foodName.isNotEmpty() && caloriesPerHundredGrams.isNotEmpty() && foodAmount.isNotEmpty()
         ) {
-            Text("提交")
+            Text("Submit")
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -111,7 +162,7 @@ fun DietInputScreen(navController: NavHostController) {
         Button(onClick = {
             navController.popBackStack()
         }) {
-            Text("取消")
+            Text("Cancel")
         }
     }
 }
