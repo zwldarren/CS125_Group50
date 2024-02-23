@@ -1,15 +1,8 @@
 package com.cs125.group50.screens
 
-import android.app.Activity
 import android.content.ContentValues
-import android.content.Context
-import android.content.Intent
-import android.credentials.GetCredentialException
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -39,11 +31,8 @@ import androidx.compose.ui.unit.dp
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.navigation.NavHostController
-import com.cs125.group50.viewmodel.LoginViewModel
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
 import com.cs125.group50.BuildConfig
+import com.cs125.group50.viewmodel.LoginViewModel
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
@@ -109,6 +98,7 @@ fun LoginScreen(
                 is LoginViewModel.LoginState.Success -> {
                     navController.navigate("dashboard")
                 }
+
                 is LoginViewModel.LoginState.Error -> {
                     val message = (loginState as LoginViewModel.LoginState.Error).message
                     Toast.makeText(context, message, Toast.LENGTH_LONG).show()
@@ -122,7 +112,7 @@ fun LoginScreen(
 }
 
 @Composable
-fun GoogleSignInButton(viewModel: LoginViewModel){
+fun GoogleSignInButton(viewModel: LoginViewModel) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
@@ -130,14 +120,14 @@ fun GoogleSignInButton(viewModel: LoginViewModel){
     val bytes = rawNonce.toByteArray()
     val md = MessageDigest.getInstance("SHA-256")
     val digest = md.digest(bytes)
-    val hashedNonce = digest.fold("") {str, it -> str + "%02x".format(it)}
+    val hashedNonce = digest.fold("") { str, it -> str + "%02x".format(it) }
 
-    val onClick:() -> Unit = {
+    val onClick: () -> Unit = {
         val credentialManager = CredentialManager.create(context)
 
         val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(false)
-            .setServerClientId("962909844029-0rkdscnciti9l4unm59b4nms16dprb4q.apps.googleusercontent.com")
+            .setServerClientId(BuildConfig.GOOGLE_SIGN_IN_CLIENT_ID)
             .setNonce(hashedNonce)
             .build()
 
@@ -159,9 +149,9 @@ fun GoogleSignInButton(viewModel: LoginViewModel){
 
                 Log.i(ContentValues.TAG, googleIdToken)
 
-                Toast. makeText(context, "You are singed in!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "You are singed in!", Toast.LENGTH_SHORT).show()
                 viewModel.loginWithGoogle(googleIdToken)
-            }catch (e : GoogleIdTokenParsingException){
+            } catch (e: GoogleIdTokenParsingException) {
                 Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
             }
 
