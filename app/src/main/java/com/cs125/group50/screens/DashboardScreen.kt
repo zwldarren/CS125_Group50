@@ -25,7 +25,6 @@ import com.cs125.group50.viewmodel.DashboardViewModelFactory
 import com.google.firebase.auth.FirebaseAuth
 import com.cs125.group50.nav.BaseScreen
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(navController: NavHostController, context: Context) {
     BaseScreen(
