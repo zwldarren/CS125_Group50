@@ -12,11 +12,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.cs125.group50.nav.BaseScreen
 import com.cs125.group50.viewmodel.DietInformationViewModel
 
 // 未添加到导航
+
 @Composable
 fun DietInformationScreen(navController: NavHostController, userId: String) {
+    BaseScreen(
+        navController = navController,
+        screenTitle = "Diet",
+        content = {
+            DietScrollContent(navController, userId)
+        }
+    )
+}
+
+
+@Composable
+fun DietScrollContent(navController: NavHostController, userId: String) {
     val viewModel: DietInformationViewModel = viewModel()
     LaunchedEffect(userId) {
         viewModel.loadDietInfo(userId)

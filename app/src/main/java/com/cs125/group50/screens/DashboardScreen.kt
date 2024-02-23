@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -31,13 +30,13 @@ fun DashboardScreen(navController: NavHostController, context: Context) {
         navController = navController,
         screenTitle = "Main",
         content = {
-            ScrollContent(navController, context)
+            MainScrollContent(navController, context)
         }
     )
 }
 
 @Composable
-fun ScrollContent(navController: NavHostController, context: Context) {
+fun MainScrollContent(navController: NavHostController, context: Context) {
     val factory = DashboardViewModelFactory(context)
     val dashboardViewModel: DashboardViewModel = viewModel(factory = factory)
 

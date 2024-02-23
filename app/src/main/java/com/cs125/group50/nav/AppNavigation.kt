@@ -32,6 +32,8 @@ import com.cs125.group50.screens.LoginScreen
 import com.cs125.group50.screens.UserInfoInputScreen
 import com.google.firebase.auth.FirebaseAuth
 import com.cs125.group50.screens.DietInputScreen
+import com.cs125.group50.screens.MenuScreen
+import com.cs125.group50.screens.SleepInformationScreen
 
 @Composable
 fun AppNavigation(navController: NavHostController, isUserLoggedIn: Boolean) {
@@ -81,6 +83,22 @@ fun AppNavigation(navController: NavHostController, isUserLoggedIn: Boolean) {
                 // 处理未登录或用户ID为空的情况
             }
         }
+
+        composable("sleepInfo"){
+            if (userId.isNotEmpty()){
+                SleepInformationScreen(navController, userId)
+            } else{
+                // 处理
+            }
+        }
+
+        composable("menu"){
+            if (userId.isNotEmpty()){
+                MenuScreen(navController, userId)
+            } else{
+                // 处理
+            }
+        }
     }
 }
 
@@ -124,9 +142,9 @@ data class BottomNavItem(
 fun BottomNavigation(navController: NavHostController) {
     val items = listOf(
         BottomNavItem("Home", Icons.Filled.Home, "dashboard"),
-        BottomNavItem("Diet", null, "dietInput"), // 圆形
+        BottomNavItem("Diet", null, "dietInfo"), // 圆形
         BottomNavItem("Exercise", null, "exercise"), // 正方形
-        BottomNavItem("Sleep", null, "sleep"), // 三角形
+        BottomNavItem("Sleep", null, "sleepInfo"), // 三角形
         BottomNavItem("Menu", Icons.Filled.Menu, "menu")
     )
     NavigationBar {
