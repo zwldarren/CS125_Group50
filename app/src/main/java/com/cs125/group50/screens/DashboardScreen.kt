@@ -57,7 +57,7 @@ fun MainScrollContent(navController: NavHostController, context: Context) {
     ) {
         Text("Welcome to the Dashboard")
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         // 使按钮宽度一致并设置统一的高度
         val buttonModifier = Modifier
@@ -65,50 +65,10 @@ fun MainScrollContent(navController: NavHostController, context: Context) {
             .height(48.dp)
 
 
-        if (!hasAllPermissions.value) {
-            Button(
-                onClick = {
-                    dashboardViewModel.requestPermissions(permissionLauncher)
-                },
-                modifier = buttonModifier
-            ) {
-                Text("Request Permission")
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-
         Spacer(modifier = Modifier.height(8.dp))
 
-        Button(
-            onClick = { navController.navigate("userInfoInput") },
-            modifier = buttonModifier
-        ) {
-            Text("Enter User Info")
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Button(
-            onClick = { navController.navigate("dietInput") },
-            modifier = buttonModifier
-        ) {
-            Text("Diet Input")
-        }
 
         // 使用Spacer来填充中间的空间，将登出按钮推到底部
-        Spacer(modifier = Modifier.weight(1f))
-
-        Button(
-            onClick = {
-                FirebaseAuth.getInstance().signOut()
-                navController.navigate("login") {
-                    popUpTo("login") { inclusive = true }
-                }
-            },
-            modifier = buttonModifier
-        ) {
-            Text("Logout")
-        }
+//        Spacer(modifier = Modifier.weight(1f))
     }
 }

@@ -103,7 +103,7 @@ fun AppNavigation(navController: NavHostController, isUserLoggedIn: Boolean) {
 
         composable("menu"){
             if (userId.isNotEmpty()){
-                MenuScreen(navController, userId)
+                MenuScreen(navController, userId, context)
             } else{
                 // 处理
             }
