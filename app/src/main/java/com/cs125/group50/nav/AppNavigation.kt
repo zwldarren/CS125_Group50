@@ -46,7 +46,7 @@ fun AppNavigation(navController: NavHostController, isUserLoggedIn: Boolean) {
         composable("login") { LoginScreen(navController) }
         composable("dashboard") {
             if (userId.isNotEmpty()) {
-                DashboardScreen(navController, context)
+                DashboardScreen(navController, context, userId)
             } else {
                 // 处理未登录或用户ID为空的情况
             }
