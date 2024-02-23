@@ -41,7 +41,6 @@ fun DashboardScreen(navController: NavHostController, context: Context) {
 fun ScrollContent(navController: NavHostController, context: Context) {
     val factory = DashboardViewModelFactory(context)
     val dashboardViewModel: DashboardViewModel = viewModel(factory = factory)
-    val bottomItems = listOf("Main", "Diet", "Sleep", "Exercise", "Menu")
 
     val hasAllPermissions = dashboardViewModel.hasAllPermissions.collectAsState()
     val permissionLauncher = rememberLauncherForActivityResult(

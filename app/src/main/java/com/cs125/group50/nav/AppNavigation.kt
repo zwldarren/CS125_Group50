@@ -1,6 +1,5 @@
 package com.cs125.group50.nav
 
-import android.content.Context
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
@@ -31,7 +30,6 @@ import com.cs125.group50.screens.LoginScreen
 import com.cs125.group50.screens.UserInfoInputScreen
 import com.google.firebase.auth.FirebaseAuth
 import com.cs125.group50.screens.DietInputScreen
-import com.cs125.group50.screens.ScrollContent
 
 @Composable
 fun AppNavigation(navController: NavHostController, isUserLoggedIn: Boolean) {
