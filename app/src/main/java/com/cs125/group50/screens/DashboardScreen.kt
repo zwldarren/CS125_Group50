@@ -31,7 +31,8 @@ import androidx.compose.runtime.getValue
 
 @Composable
 fun DashboardScreen(navController: NavHostController, context: Context, userId: String) {
-    val viewModel: DashboardViewModel = viewModel()
+//    val viewModel: DashboardViewModel = viewModel()
+    val viewModel: DashboardViewModel = viewModel(factory = DashboardViewModelFactory(context))
 
     LaunchedEffect(userId) {
         viewModel.loadUserInfo(userId)
@@ -41,6 +42,8 @@ fun DashboardScreen(navController: NavHostController, context: Context, userId: 
         navController = navController,
         screenTitle = "Main",
         content = {
+            // 添加额外的Spacer来避免内容被AppBar遮挡
+//            Spacer(modifier = Modifier.height(64.dp))
             MainScrollContent(navController, viewModel)
         }
     )
@@ -52,8 +55,12 @@ fun MainScrollContent(navController: NavHostController, viewModel: DashboardView
     val healthAdvice by viewModel.healthAdvice.collectAsState()
 
     Column(modifier = Modifier.padding(16.dp)) {
+
+        Spacer(modifier = Modifier.height(64.dp))
+
         Text("Welcome to the Dashboard", style = MaterialTheme.typography.headlineMedium)
 
+        Spacer(modifier = Modifier.height(16.dp))
         if (userInfo != null) {
             Text("Gender: ${userInfo?.gender}")
             Text("Height: ${userInfo?.height} cm")
@@ -61,7 +68,10 @@ fun MainScrollContent(navController: NavHostController, viewModel: DashboardView
             Text("Age: ${userInfo?.age}")
 
             val bmi = userInfo?.let { calculateBMI(it.height.toDouble(), it.weight.toDouble()) }
-            Text("BMI: $bmi")
+//            Text("BMI: $bmi")
+            if (bmi != null) {
+                Text("BMI: ${bmi.format(2)}")
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
             Text("Health Advice: $healthAdvice", style = MaterialTheme.typography.bodyLarge)
@@ -76,3 +86,5 @@ fun calculateBMI(height: Double, weight: Double): Double {
     val heightInMeters = height / 100
     return weight / (heightInMeters * heightInMeters)
 }
+
+fun Double.format(digits: Int) = "%.${digits}f".format(this)
