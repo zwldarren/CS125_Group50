@@ -56,7 +56,7 @@ fun ActivityScrollContent(navController: NavHostController, userId: String) {
         Button(onClick = {
             navController.popBackStack()
         }) {
-            Text("Cancel")
+            Text("Back")
         }
     }
 }

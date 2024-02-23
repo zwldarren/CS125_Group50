@@ -60,7 +60,7 @@ fun DietScrollContent(navController: NavHostController, userId: String) {
         Button(onClick = {
             navController.popBackStack()
         }) {
-            Text("Cancel")
+            Text("Back")
         }
     }
 }

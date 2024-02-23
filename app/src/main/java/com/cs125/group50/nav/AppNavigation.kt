@@ -35,6 +35,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.cs125.group50.screens.DietInputScreen
 import com.cs125.group50.screens.MenuScreen
 import com.cs125.group50.screens.SleepInformationScreen
+import com.cs125.group50.screens.SleepInputScreen
 
 @Composable
 fun AppNavigation(navController: NavHostController, isUserLoggedIn: Boolean) {
@@ -98,6 +99,14 @@ fun AppNavigation(navController: NavHostController, isUserLoggedIn: Boolean) {
                 SleepInformationScreen(navController, userId)
             } else{
                 // 处理
+            }
+        }
+
+        composable("sleepInput") {
+            if (userId.isNotEmpty()) {
+                SleepInputScreen(navController, userId)
+            } else {
+                // 处理未登录或用户ID为空的情况
             }
         }
 

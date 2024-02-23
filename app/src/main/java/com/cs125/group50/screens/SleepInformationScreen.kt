@@ -1,21 +1,31 @@
 package com.cs125.group50.screens
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.cs125.group50.nav.BaseScreen
+import com.cs125.group50.viewmodel.SleepInformationViewModel
 
 @Composable
 fun SleepInformationScreen(navController: NavHostController, userId: String) {
     BaseScreen(
         navController = navController,
-        screenTitle = "Sleep",
+        screenTitle = "Sleep Information",
         content = {
             SleepScrollContent(navController, userId)
         }
@@ -23,12 +33,36 @@ fun SleepInformationScreen(navController: NavHostController, userId: String) {
 }
 
 @Composable
-fun SleepScrollContent(navController: NavHostController, userId: String){
-    Column(modifier = Modifier.fillMaxSize()) {
-        // 这里是你的空白页面。你可以在这个 Column 中添加任何你想要的组件。
-        // 例如，一个简单的文本提示，表明这是一个待开发的页面：
-        Text(text = "Sleep Information Screen for User ID: $userId",
-            modifier = Modifier.align(Alignment.CenterHorizontally).padding(16.dp))
-        // 当你准备添加更多内容时，只需在这里继续添加即可。
+fun SleepScrollContent(navController: NavHostController, userId: String) {
+    val viewModel: SleepInformationViewModel = viewModel()
+    LaunchedEffect(true) {
+        viewModel.loadSleepInfo()
+    }
+    val sleepInfoList by viewModel.sleepInfoList.collectAsState()
+
+    Column(modifier = Modifier.padding(16.dp)) {
+        Text("Your Sleep Information", style = MaterialTheme.typography.headlineMedium)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        sleepInfoList.forEach { sleepInfo ->
+            Text("Duration: ${sleepInfo.duration}, Start Time: ${sleepInfo.startTime}, End Time: ${sleepInfo.endTime}")
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        Button(
+            onClick = { navController.navigate("sleepInput") },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Add New Sleep Information")
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(onClick = {
+            navController.popBackStack()
+        }) {
+            Text("Back")
+        }
     }
 }
