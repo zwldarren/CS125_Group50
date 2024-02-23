@@ -19,7 +19,7 @@ import java.time.LocalTime
 import java.util.*
 
 @Composable
-fun ActivityInputScreen(navController: NavHostController) {
+fun ActivityInputScreen(navController: NavHostController, userId: String) {
     val context = LocalContext.current
     var activityType by remember { mutableStateOf("") }
     var showStartTimePicker by remember { mutableStateOf(false) }

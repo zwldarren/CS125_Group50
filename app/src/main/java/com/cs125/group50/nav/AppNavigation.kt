@@ -25,7 +25,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.cs125.group50.screens.ActivityInputScreen
 import com.cs125.group50.screens.DashboardScreen
+import com.cs125.group50.screens.DietInformationScreen
 import com.cs125.group50.screens.LoginScreen
 import com.cs125.group50.screens.UserInfoInputScreen
 import com.google.firebase.auth.FirebaseAuth
@@ -57,6 +59,24 @@ fun AppNavigation(navController: NavHostController, isUserLoggedIn: Boolean) {
         composable("dietInput") {
             if (userId.isNotEmpty()) {
                 DietInputScreen(navController, userId)
+            } else {
+                // 处理未登录或用户ID为空的情况
+            }
+        }
+
+        // 查看饮食相关的界面
+        composable("dietInfo") {
+            if (userId.isNotEmpty()) {
+                DietInformationScreen(navController, userId)
+            } else {
+                // 处理未登录或用户ID为空的情况
+            }
+        }
+
+        // 输入活动的界面
+        composable("activityInput") {
+            if (userId.isNotEmpty()) {
+                ActivityInputScreen(navController, userId)
             } else {
                 // 处理未登录或用户ID为空的情况
             }
