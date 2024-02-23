@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.cs125.group50.screens.ActivityInformationScreen
 import com.cs125.group50.screens.ActivityInputScreen
 import com.cs125.group50.screens.DashboardScreen
 import com.cs125.group50.screens.DietInformationScreen
@@ -79,6 +80,14 @@ fun AppNavigation(navController: NavHostController, isUserLoggedIn: Boolean) {
         composable("activityInput") {
             if (userId.isNotEmpty()) {
                 ActivityInputScreen(navController, userId)
+            } else {
+                // 处理未登录或用户ID为空的情况
+            }
+        }
+
+        composable("activityInfo") {
+            if (userId.isNotEmpty()) {
+                ActivityInformationScreen(navController, userId)
             } else {
                 // 处理未登录或用户ID为空的情况
             }
@@ -143,7 +152,7 @@ fun BottomNavigation(navController: NavHostController) {
     val items = listOf(
         BottomNavItem("Home", Icons.Filled.Home, "dashboard"),
         BottomNavItem("Diet", null, "dietInfo"), // 圆形
-        BottomNavItem("Exercise", null, "exercise"), // 正方形
+        BottomNavItem("Exercise", null, "activityInfo"), // 正方形
         BottomNavItem("Sleep", null, "sleepInfo"), // 三角形
         BottomNavItem("Menu", Icons.Filled.Menu, "menu")
     )

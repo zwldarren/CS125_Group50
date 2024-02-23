@@ -12,10 +12,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.cs125.group50.nav.BaseScreen
 import com.cs125.group50.viewmodel.ActivityInformationViewModel
 
 @Composable
-fun ActivityInformationScreen(navController: NavHostController, userId: String) {
+fun ActivityInformationScreen(navController: NavHostController, userId: String){
+    BaseScreen(
+        navController = navController,
+        screenTitle = "Exercise",
+        content = {
+            ActivityScrollContent(navController, userId)
+        }
+    )
+}
+
+@Composable
+fun ActivityScrollContent(navController: NavHostController, userId: String) {
     val viewModel: ActivityInformationViewModel = viewModel()
     LaunchedEffect(true) {
         viewModel.loadActivityInfo()
