@@ -98,10 +98,15 @@ class DashboardViewModel(context: Context) : ViewModel() {
     private fun calculateHealthAdvice(user: UserInfo): String {
         // 假设的健康建议逻辑，需要根据实际情况调整
 //        return "Based on your profile, here is your health advice..."
-        return "BBased on your profile, here is your health advice:\n\n" +
-                "Increase sleep duration: Your current average sleep time is slightly below the recommended 7-9 hours for adults. Consider gradually increasing your sleep time to improve overall physical and mental health.\n\n" +
-                "Adjust dietary habits: Based on your height and weight, it is recommended to adopt a balanced diet, increase the intake of vegetables and fruits, and reduce the consumption of high-sugar and high-fat foods to achieve a healthier weight.\n\n" +
-                "Regular health check-ups: As a 20-year-old, regular health check-ups can help you detect and address potential health issues early."
+        return "Based on your personal information and lifestyle habits, we offer the following health advice:\n\n" +
+                "Increase sleep duration: Your current average sleep time is slightly below the recommended 7-9 hours for adults.\n" +
+                "Adjust dietary habits: Based on your height and weight, it is recommended to adopt a balanced diet, increase the intake of vegetables and fruits, and reduce the consumption of high-sugar and high-fat foods to achieve a healthier weight.\n" +
+                "Here are some recommended ingredients and recipes:\n" +
+                "Chicken Breast: Grilled chicken breast with vegetable salad, chicken breast salad wrap.\n" +
+                "Avocado: Avocado salad, avocado yogurt salad.\n" +
+//                "Oats: Oatmeal nut energy balls, oat cookies.\n" +
+                "Eggs: Boiled eggs, vegetable omelette, egg muffin.\n" +
+                "Lean Beef: Beef tomato stew, beef salad wrap, lean beef stir-fry with vegetables.\n"
     }
 
 }

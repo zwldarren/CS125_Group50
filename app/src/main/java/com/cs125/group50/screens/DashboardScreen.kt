@@ -56,9 +56,9 @@ fun MainScrollContent(navController: NavHostController, viewModel: DashboardView
 
     Column(modifier = Modifier.padding(16.dp)) {
 
-        Spacer(modifier = Modifier.height(64.dp))
+        Spacer(modifier = Modifier.height(50.dp))
 
-        Text("Welcome to the Dashboard", style = MaterialTheme.typography.headlineMedium)
+//        Text("Welcome to the Dashboard", style = MaterialTheme.typography.headlineMedium)
 
         Spacer(modifier = Modifier.height(16.dp))
         if (userInfo != null) {
