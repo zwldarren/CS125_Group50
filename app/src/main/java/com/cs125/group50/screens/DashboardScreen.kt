@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -22,81 +23,68 @@ import androidx.navigation.NavHostController
 import com.cs125.group50.viewmodel.DashboardViewModel
 import com.cs125.group50.viewmodel.DashboardViewModelFactory
 import com.google.firebase.auth.FirebaseAuth
+import com.cs125.group50.nav.BaseScreen
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+
 
 @Composable
-fun DashboardScreen(navController: NavHostController, context: Context) {
-    val factory = DashboardViewModelFactory(context)
-    val dashboardViewModel: DashboardViewModel = viewModel(factory = factory)
+fun DashboardScreen(navController: NavHostController, context: Context, userId: String) {
+//    val viewModel: DashboardViewModel = viewModel()
+    val viewModel: DashboardViewModel = viewModel(factory = DashboardViewModelFactory(context))
 
-    val hasAllPermissions = dashboardViewModel.hasAllPermissions.collectAsState()
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = PermissionController.createRequestPermissionResultContract(),
-        onResult = { _ ->
-            dashboardViewModel.checkPermissions()
+    LaunchedEffect(userId) {
+        viewModel.loadUserInfo(userId)
+    }
+
+    BaseScreen(
+        navController = navController,
+        screenTitle = "Main",
+        content = {
+            // 添加额外的Spacer来避免内容被AppBar遮挡
+//            Spacer(modifier = Modifier.height(64.dp))
+            MainScrollContent(navController, viewModel)
         }
     )
+}
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp), // 添加padding增加边距
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text("Welcome to the Dashboard")
+@Composable
+fun MainScrollContent(navController: NavHostController, viewModel: DashboardViewModel) {
+    val userInfo by viewModel.userInfo.collectAsState()
+    val healthAdvice by viewModel.healthAdvice.collectAsState()
+
+    Column(modifier = Modifier.padding(16.dp)) {
+
+        Spacer(modifier = Modifier.height(50.dp))
+
+//        Text("Welcome to the Dashboard", style = MaterialTheme.typography.headlineMedium)
 
         Spacer(modifier = Modifier.height(16.dp))
+        if (userInfo != null) {
+            Text("Gender: ${userInfo?.gender}")
+            Text("Height: ${userInfo?.height} cm")
+            Text("Weight: ${userInfo?.weight} kg")
+            Text("Age: ${userInfo?.age}")
 
-        // 使按钮宽度一致并设置统一的高度
-        val buttonModifier = Modifier
-            .fillMaxWidth()
-            .height(48.dp)
-
-
-        if (!hasAllPermissions.value) {
-            Button(
-                onClick = {
-                    dashboardViewModel.requestPermissions(permissionLauncher)
-                },
-                modifier = buttonModifier
-            ) {
-                Text("Request Permission")
+            val bmi = userInfo?.let { calculateBMI(it.height.toDouble(), it.weight.toDouble()) }
+//            Text("BMI: $bmi")
+            if (bmi != null) {
+                Text("BMI: ${bmi.format(2)}")
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Button(
-            onClick = { navController.navigate("userInfoInput") },
-            modifier = buttonModifier
-        ) {
-            Text("Enter User Info")
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Button(
-            onClick = { navController.navigate("dietInput") },
-            modifier = buttonModifier
-        ) {
-            Text("Diet Input")
-        }
-
-        // 使用Spacer来填充中间的空间，将登出按钮推到底部
-        Spacer(modifier = Modifier.weight(1f))
-
-        Button(
-            onClick = {
-                FirebaseAuth.getInstance().signOut()
-                navController.navigate("login") {
-                    popUpTo("login") { inclusive = true }
-                }
-            },
-            modifier = buttonModifier
-        ) {
-            Text("Logout")
+            Spacer(modifier = Modifier.height(16.dp))
+            Text("Health Advice: $healthAdvice", style = MaterialTheme.typography.bodyLarge)
+        } else {
+            Text("No user information found. Please update your profile.",
+                style = MaterialTheme.typography.bodyLarge)
         }
     }
 }
+
+fun calculateBMI(height: Double, weight: Double): Double {
+    val heightInMeters = height / 100
+    return weight / (heightInMeters * heightInMeters)
+}
+
+fun Double.format(digits: Int) = "%.${digits}f".format(this)

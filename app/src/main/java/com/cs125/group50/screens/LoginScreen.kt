@@ -32,6 +32,7 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.navigation.NavHostController
 import com.cs125.group50.BuildConfig
+import com.cs125.group50.R
 import com.cs125.group50.viewmodel.LoginViewModel
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
@@ -127,7 +128,7 @@ fun GoogleSignInButton(viewModel: LoginViewModel) {
 
         val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(false)
-            .setServerClientId(BuildConfig.GOOGLE_SIGN_IN_CLIENT_ID)
+            .setServerClientId(context.getString(R.string.clientId))
             .setNonce(hashedNonce)
             .build()
 
@@ -153,6 +154,9 @@ fun GoogleSignInButton(viewModel: LoginViewModel) {
                 viewModel.loginWithGoogle(googleIdToken)
             } catch (e: GoogleIdTokenParsingException) {
                 Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+            } catch (e: Exception){
+                Toast.makeText(context, "Error signing in: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+
             }
 
         }
