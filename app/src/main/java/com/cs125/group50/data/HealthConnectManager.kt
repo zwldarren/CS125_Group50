@@ -1,12 +1,18 @@
 package com.cs125.group50.data
 
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.compose.runtime.mutableStateOf
 import androidx.health.connect.client.HealthConnectClient
-import androidx.health.connect.client.PermissionController
+import androidx.health.connect.client.records.ExerciseSessionRecord
+import androidx.health.connect.client.records.HeightRecord
+import androidx.health.connect.client.records.NutritionRecord
+import androidx.health.connect.client.records.SleepSessionRecord
+import androidx.health.connect.client.records.StepsRecord
+import androidx.health.connect.client.records.WeightRecord
+import androidx.health.connect.client.request.ReadRecordsRequest
+import androidx.health.connect.client.time.TimeRangeFilter
+import java.time.Instant
 
 
 class HealthConnectManager(private val context: Context) {
@@ -18,7 +24,7 @@ class HealthConnectManager(private val context: Context) {
     init {
         checkAvailability()
     }
-    
+
     fun checkAvailability() {
         availability.value = when {
             HealthConnectClient.getSdkStatus(context) == HealthConnectClient.SDK_AVAILABLE -> HealthConnectAvailability.INSTALLED
@@ -35,7 +41,10 @@ class HealthConnectManager(private val context: Context) {
             .containsAll(permissions)
     }
 
-    suspend fun checkPermissionsAndRun(requiredPermissions: Set<String>, permissionLauncher: ManagedActivityResultLauncher<Set<String>, Set<String>>) {
+    suspend fun checkPermissionsAndRun(
+        requiredPermissions: Set<String>,
+        permissionLauncher: ManagedActivityResultLauncher<Set<String>, Set<String>>
+    ) {
         if (availability.value == HealthConnectAvailability.INSTALLED) {
             if (!hasAllPermissions(requiredPermissions)) {
                 permissionLauncher.launch(requiredPermissions.toTypedArray().toSet())
@@ -43,7 +52,66 @@ class HealthConnectManager(private val context: Context) {
         }
     }
 
+    /**
+     *  Below are the methods used to read the health data from the HealthConnect API.
+     */
 
+    suspend fun readWeightInputs(start: Instant, end: Instant): List<WeightRecord> {
+        val request = ReadRecordsRequest(
+            recordType = WeightRecord::class,
+            timeRangeFilter = TimeRangeFilter.between(start, end)
+        )
+        val response = healthConnectClient.readRecords(request)
+        return response.records
+    }
+
+    suspend fun readHeightRecords(startTime: Instant, endTime: Instant): List<HeightRecord> {
+        val request = ReadRecordsRequest(
+            recordType = HeightRecord::class,
+            timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
+        )
+        val response = healthConnectClient.readRecords(request)
+        return response.records
+    }
+
+    suspend fun readExerciseRecords(
+        startTime: Instant,
+        endTime: Instant
+    ): List<ExerciseSessionRecord> {
+        val request = ReadRecordsRequest(
+            recordType = ExerciseSessionRecord::class,
+            timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
+        )
+        val response = healthConnectClient.readRecords(request)
+        return response.records
+    }
+
+    suspend fun readDietRecords(startTime: Instant, endTime: Instant): List<NutritionRecord> {
+        val request = ReadRecordsRequest(
+            recordType = NutritionRecord::class,
+            timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
+        )
+        val response = healthConnectClient.readRecords(request)
+        return response.records
+    }
+
+    suspend fun readSleepRecords(startTime: Instant, endTime: Instant): List<SleepSessionRecord> {
+        val request = ReadRecordsRequest(
+            recordType = SleepSessionRecord::class,
+            timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
+        )
+        val response = healthConnectClient.readRecords(request)
+        return response.records
+    }
+
+    suspend fun readStepsRecords(startTime: Instant, endTime: Instant): List<StepsRecord> {
+        val request = ReadRecordsRequest(
+            recordType = StepsRecord::class,
+            timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
+        )
+        val response = healthConnectClient.readRecords(request)
+        return response.records
+    }
 }
 
 enum class HealthConnectAvailability {
