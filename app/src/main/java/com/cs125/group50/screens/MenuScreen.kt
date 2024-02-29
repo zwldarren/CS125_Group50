@@ -36,7 +36,7 @@ fun MenuScreen(navController: NavHostController, userId: String, context: Contex
 }
 
 @Composable
-fun MenuScrollContent(navController: NavHostController, userId: String, context: Context){
+fun MenuScrollContent(navController: NavHostController, userId: String, context: Context) {
     val factory = DashboardViewModelFactory(context)
     val dashboardViewModel: DashboardViewModel = viewModel(factory = factory)
 
@@ -99,5 +99,17 @@ fun MenuScrollContent(navController: NavHostController, userId: String, context:
         ) {
             Text("Logout")
         }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = {
+                dashboardViewModel.synchronizeHealthData()
+            },
+            modifier = buttonModifier
+        ) {
+            Text("Synchronize Health Data")
+        }
+        
     }
 }
