@@ -143,10 +143,8 @@ fun DietInputScreen(navController: NavHostController, userId: String) {
 
         Button(
             onClick = {
-                // 调用ViewModel来显示饮食信息，后续确定饮食相关的数据库结构后会修改成提示输入成功
                 viewModel.saveDietInfo(userId, mealType, foodName, caloriesPerHundredGrams, foodAmount, selectedDate, selectedTime)
                 navController.popBackStack()
-
             },
             // 检查所有字段是否填写
             enabled = mealType.isNotEmpty() && foodName.isNotEmpty() && caloriesPerHundredGrams.isNotEmpty() && foodAmount.isNotEmpty()

@@ -15,7 +15,9 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.foundation.clickable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cs125.group50.viewmodel.ActivityInputViewModel
+import java.time.LocalDate
 import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Composable
@@ -29,6 +31,8 @@ fun ActivityInputScreen(navController: NavHostController, userId: String) {
     val activityTypes = listOf("Walking", "Running", "Cycling", "Swimming")
     var expanded by remember { mutableStateOf(false) }
     val viewModel: ActivityInputViewModel = viewModel()
+    var showDatePicker by remember { mutableStateOf(false) }
+    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
 
     Column(
         modifier = Modifier
@@ -66,6 +70,26 @@ fun ActivityInputScreen(navController: NavHostController, userId: String) {
         }
         Spacer(modifier = Modifier.height(16.dp))
 
+        TextButton(onClick = { showDatePicker = true }) {
+            Text(text = "Select Date: ${selectedDate.format(DateTimeFormatter.ISO_LOCAL_DATE)}")
+        }
+
+
+        if (showDatePicker) {
+            val calendar = Calendar.getInstance()
+            android.app.DatePickerDialog(
+                context,
+                { _, year, month, dayOfMonth ->
+                    selectedDate = LocalDate.of(year, month + 1, dayOfMonth)
+                    showDatePicker = false
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+            ).show()
+            showDatePicker = false
+        }
+
         // Start Time Picker
         TextButton(onClick = { showStartTimePicker = true }) {
             Text(text = "Select Start Time: ${startTime.toString()}")
@@ -87,8 +111,7 @@ fun ActivityInputScreen(navController: NavHostController, userId: String) {
 
         Button(
             onClick = {
-                viewModel.showActivityData(activityType, startTime, endTime)
-                Toast.makeText(context, "Activity: $activityType, Start: $startTime, End: $endTime", Toast.LENGTH_LONG).show()
+                viewModel.saveActivityInfo(userId, activityType, startTime, endTime, selectedDate)
                 navController.popBackStack()
             },
             enabled = activityType.isNotEmpty()
