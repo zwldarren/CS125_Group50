@@ -21,8 +21,6 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.time.Instant
-import java.time.temporal.ChronoUnit
 
 
 class DashboardViewModel(context: Context) : ViewModel() {
@@ -115,10 +113,6 @@ class DashboardViewModel(context: Context) : ViewModel() {
         viewModelScope.launch {
             // Example of synchronizing weight records
             if (healthConnectManager.hasAllPermissions(requiredPermissions)) {
-                val weightRecords = healthConnectManager.readWeightInputs(
-                    start = Instant.now().minus(30, ChronoUnit.DAYS),
-                    end = Instant.now()
-                )
                 // Handle the fetched records, update UI or local database as needed
             } else {
                 // You might need to pass a permission launcher here as well, similar to how it's done for checking permissions

@@ -65,15 +65,6 @@ class HealthConnectManager(private val context: Context) {
      *  Below are the methods used to read the health data from the HealthConnect API.
      */
 
-    suspend fun readWeightInputs(start: Instant, end: Instant): List<WeightRecord> {
-        val request = ReadRecordsRequest(
-            recordType = WeightRecord::class,
-            timeRangeFilter = TimeRangeFilter.between(start, end)
-        )
-        val response = healthConnectClient.readRecords(request)
-        return response.records
-    }
-
     suspend fun readHeightRecords(startTime: Instant, endTime: Instant): List<HeightRecord> {
         val request = ReadRecordsRequest(
             recordType = HeightRecord::class,
