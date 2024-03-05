@@ -7,7 +7,6 @@ import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.changes.Change
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.HeartRateRecord
-import androidx.health.connect.client.records.HeightRecord
 import androidx.health.connect.client.records.NutritionRecord
 import androidx.health.connect.client.records.Record
 import androidx.health.connect.client.records.SleepSessionRecord
@@ -15,12 +14,14 @@ import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import androidx.health.connect.client.records.WeightRecord
 import androidx.health.connect.client.records.metadata.DataOrigin
+import androidx.health.connect.client.request.AggregateRequest
 import androidx.health.connect.client.request.ChangesTokenRequest
 import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import java.io.IOException
+import java.time.Duration
 import java.time.Instant
 
 
@@ -65,13 +66,22 @@ class HealthConnectManager(private val context: Context) {
      *  Below are the methods used to read the health data from the HealthConnect API.
      */
 
-    suspend fun readHeightRecords(startTime: Instant, endTime: Instant): List<HeightRecord> {
-        val request = ReadRecordsRequest(
-            recordType = HeightRecord::class,
-            timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
-        )
-        val response = healthConnectClient.readRecords(request)
-        return response.records
+    suspend fun filterNutritionRecords(records: List<NutritionRecord>): List<Map<String, Any?>> {
+        return records.map { record ->
+            mapOf(
+                "mealType" to record.mealType,
+                "totalFat" to record.totalFat?.inGrams,
+                "energy" to record.energy?.inCalories,
+            )
+        }
+    }
+
+    suspend fun filterSleepRecords(records: List<SleepSessionRecord>): List<Map<String, Any?>> {
+        return records.map { record ->
+            mapOf(
+                "duration" to Duration.between(record.startTime, record.endTime).toMinutes()
+            )
+        }
     }
 
     suspend fun readExerciseRecords(
@@ -104,14 +114,104 @@ class HealthConnectManager(private val context: Context) {
         return response.records
     }
 
-    suspend fun readStepsRecords(startTime: Instant, endTime: Instant): List<StepsRecord> {
+    suspend fun readTotalCaloriesBurnedRecords(
+        startTime: Instant,
+        endTime: Instant
+    ): List<TotalCaloriesBurnedRecord> {
         val request = ReadRecordsRequest(
-            recordType = StepsRecord::class,
+            recordType = TotalCaloriesBurnedRecord::class,
             timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
         )
         val response = healthConnectClient.readRecords(request)
         return response.records
     }
+
+    suspend fun readHeartRateRecords(startTime: Instant, endTime: Instant): List<HeartRateRecord> {
+        val request = ReadRecordsRequest(
+            recordType = HeartRateRecord::class,
+            timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
+        )
+        val response = healthConnectClient.readRecords(request)
+        return response.records
+    }
+
+    suspend fun integrateExerciseData(
+        exerciseRecords: List<ExerciseSessionRecord>,
+        caloriesRecords: List<TotalCaloriesBurnedRecord>,
+        heartRateRecords: List<HeartRateRecord>
+    ): List<Map<String, Any?>> {
+        return exerciseRecords.map { exerciseRecord ->
+            val exerciseDuration =
+                Duration.between(exerciseRecord.startTime, exerciseRecord.endTime)
+            val caloriesBurnedDuringExercise = caloriesRecords.filter {
+                it.startTime >= exerciseRecord.startTime && it.endTime <= exerciseRecord.endTime
+            }.sumOf { it.energy.inCalories }
+
+            val heartRatesDuringExercise = heartRateRecords.flatMap { hrRecord ->
+                hrRecord.samples.filter {
+                    it.time >= exerciseRecord.startTime && it.time <= exerciseRecord.endTime
+                }.map { it.beatsPerMinute.toDouble() }
+            }
+            val averageHeartRate = heartRatesDuringExercise.average()
+
+            mapOf(
+                "exerciseType" to exerciseRecord.exerciseType,
+                "duration" to exerciseDuration.toMinutes(),
+                "caloriesBurned" to caloriesBurnedDuringExercise,
+                "averageHeartRate" to averageHeartRate
+            )
+        }
+    }
+
+    suspend fun aggregateTotalCaloriesBurned(
+        healthConnectClient: HealthConnectClient,
+        startTime: Instant,
+        endTime: Instant
+    ): Double {
+        return try {
+            val response = healthConnectClient.aggregate(
+                AggregateRequest(
+                    metrics = setOf(TotalCaloriesBurnedRecord.ENERGY_TOTAL),
+                    timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
+                )
+            )
+            // Convert total energy to kilocalories, may be null if no data is available
+            response[TotalCaloriesBurnedRecord.ENERGY_TOTAL]?.inCalories ?: 0.0
+        } catch (e: Exception) {
+            0.0 // Or handle error more appropriately
+        }
+    }
+
+    suspend fun aggregateHeartRate(
+        healthConnectClient: HealthConnectClient,
+        startTime: Instant,
+        endTime: Instant
+    ): Map<String, Double?> {
+        return try {
+            val response = healthConnectClient.aggregate(
+                AggregateRequest(
+                    metrics = setOf(
+                        HeartRateRecord.BPM_MAX,
+                        HeartRateRecord.BPM_MIN,
+                        HeartRateRecord.BPM_AVG
+                    ),
+                    timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
+                )
+            )
+            mapOf(
+                "minimumHeartRate" to response[HeartRateRecord.BPM_MIN]?.toDouble(),
+                "maximumHeartRate" to response[HeartRateRecord.BPM_MAX]?.toDouble(),
+                "averageHeartRate" to response[HeartRateRecord.BPM_AVG]?.toDouble()
+            )
+        } catch (e: Exception) {
+            mapOf(
+                "minimumHeartRate" to null,
+                "maximumHeartRate" to null,
+                "averageHeartRate" to null
+            )
+        }
+    }
+
 
     suspend fun getChangesToken(): String {
         return healthConnectClient.getChangesToken(
