@@ -5,5 +5,15 @@ package com.cs125.group50.data
 data class ActivityInfo(
     val activityType: String,
     val duration: String,
+    val caloriesBurned: String,
+    val averageHeartRate: String,
     val distance: String
+)
+
+data class HeartRateInfo(
+    val startTime: String,
+    val endTime: String,
+    val minimumHeartRate: String,
+    val maximumHeartRate: String,
+    val averageHeartRate: String
 )
