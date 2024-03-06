@@ -8,19 +8,27 @@ import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.BodyFatRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.HeartRateRecord
-import androidx.health.connect.client.records.HeightRecord
+import androidx.health.connect.client.records.NutritionRecord
 import androidx.health.connect.client.records.SleepSessionRecord
-import androidx.health.connect.client.records.WeightRecord
+import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.cs125.group50.data.ActivityInfo
+import com.cs125.group50.data.DietInfo
 import com.cs125.group50.data.HealthConnectManager
+import com.cs125.group50.data.HealthDataInfo
+import com.cs125.group50.data.HeartRateInfo
+import com.cs125.group50.data.SleepInfo
 import com.cs125.group50.data.UserInfo
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.time.Duration
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 
 class DashboardViewModel(context: Context) : ViewModel() {
@@ -30,13 +38,12 @@ class DashboardViewModel(context: Context) : ViewModel() {
     // https://developer.android.com/reference/kotlin/androidx/health/connect/client/records/package-summary
     private val requiredPermissions = setOf(
         HealthPermission.getReadPermission(HeartRateRecord::class),
-//        HealthPermission.getReadPermission(StepsRecord::class),
-        HealthPermission.getReadPermission(HeightRecord::class),
-        HealthPermission.getReadPermission(WeightRecord::class),
         HealthPermission.getReadPermission(SleepSessionRecord::class),
         HealthPermission.getReadPermission(ExerciseSessionRecord::class),
         HealthPermission.getReadPermission(ActiveCaloriesBurnedRecord::class),
-        HealthPermission.getReadPermission(BodyFatRecord::class)
+        HealthPermission.getReadPermission(BodyFatRecord::class),
+        HealthPermission.getReadPermission(NutritionRecord::class),
+        HealthPermission.getReadPermission(TotalCaloriesBurnedRecord::class)
     )
     val healthConnectAvailability = healthConnectManager.availability
     var hasAllPermissions: MutableStateFlow<Boolean> = MutableStateFlow(false)
@@ -109,13 +116,70 @@ class DashboardViewModel(context: Context) : ViewModel() {
                 "Lean Beef: Beef tomato stew, beef salad wrap, lean beef stir-fry with vegetables.\n"
     }
 
-    fun synchronizeHealthData() {
+    suspend fun synchronizeHealthData() {
         viewModelScope.launch {
-            // Example of synchronizing weight records
             if (healthConnectManager.hasAllPermissions(requiredPermissions)) {
-                // Handle the fetched records, update UI or local database as needed
+                val endTime: Instant = Instant.now()
+                val startTime: Instant = endTime.minus(30, ChronoUnit.DAYS)
+
+                // Fetching all records
+                val exerciseRecords = healthConnectManager.readExerciseRecords(startTime, endTime)
+                val dietRecords = healthConnectManager.readDietRecords(startTime, endTime)
+                val sleepRecords = healthConnectManager.readSleepRecords(startTime, endTime)
+                val heartRateRecords = healthConnectManager.readHeartRateRecords(startTime, endTime)
+
+                // Converting records to data class instances
+                val activityInfos = healthConnectManager.integrateExerciseData(
+                    exerciseRecords,
+                    healthConnectManager.readTotalCaloriesBurnedRecords(startTime, endTime),
+                    heartRateRecords
+                ).map { record ->
+                    ActivityInfo(
+                        activityType = record["activityType"] ?: "",
+                        duration = record["duration"] ?: "",
+                        caloriesBurned = record["caloriesBurned"] ?: "",
+                        averageHeartRate = "", // This example does not integrate heart rate into ActivityInfo
+                        distance = "" // Assuming this information needs to be integrated separately
+                    )
+                }
+
+                val dietInfos = dietRecords.map { record ->
+                    DietInfo(
+                        mealType = record.mealType.toString(),
+                        foodName = "", // This example assumes food name is not directly available from record
+                        totalFat = record.totalFat?.inGrams.toString(),
+                        caloriesPerHundredGrams = record.energy?.inCalories.toString(),
+                        foodAmount = "", // Assuming this information needs to be integrated separately
+                        date = "", // Assuming date needs to be parsed from startTime or a separate field
+                        time = "" // Assuming time needs to be parsed from startTime or a separate field
+                    )
+                }
+
+                val sleepInfos = sleepRecords.map { record ->
+                    SleepInfo(
+                        duration = Duration.between(record.startTime, record.endTime).toMinutes()
+                            .toString(),
+                        startTime = record.startTime.toString(),
+                        endTime = record.endTime.toString()
+                    )
+                }
+
+                val heartRateAggregate = healthConnectManager.aggregateHeartRate(startTime, endTime)
+                val heartRateInfos = listOf(
+                    HeartRateInfo(
+                        startTime = heartRateAggregate["startTime"] ?: "",
+                        endTime = heartRateAggregate["endTime"] ?: "",
+                        minimumHeartRate = heartRateAggregate["minimumHeartRate"] ?: "",
+                        maximumHeartRate = heartRateAggregate["maximumHeartRate"] ?: "",
+                        averageHeartRate = heartRateAggregate["averageHeartRate"] ?: ""
+                    )
+                )
+
+                val healthDataInfo =
+                    HealthDataInfo(sleepInfos, dietInfos, activityInfos, heartRateInfos)
+
             } else {
-                // You might need to pass a permission launcher here as well, similar to how it's done for checking permissions
+
             }
         }
     }

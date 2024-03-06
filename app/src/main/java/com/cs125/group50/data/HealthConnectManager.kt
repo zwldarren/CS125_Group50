@@ -174,7 +174,6 @@ class HealthConnectManager(private val context: Context) {
     }
 
     suspend fun aggregateTotalCaloriesBurned(
-        healthConnectClient: HealthConnectClient,
         startTime: Instant,
         endTime: Instant
     ): Double {
@@ -193,7 +192,6 @@ class HealthConnectManager(private val context: Context) {
     }
 
     suspend fun aggregateHeartRate(
-        healthConnectClient: HealthConnectClient,
         startTime: Instant,
         endTime: Instant
     ): Map<String, String?> {

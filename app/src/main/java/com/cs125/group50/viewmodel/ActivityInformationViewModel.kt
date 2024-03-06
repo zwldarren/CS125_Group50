@@ -8,11 +8,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class ActivityInformationViewModel : ViewModel() {
-    private val _activityInfoList = MutableStateFlow<List<ActivityInfo>>(listOf(
-        // 示例数据，实际应用中应从数据库获取
-        ActivityInfo("Running", "30 minutes", "5 km"),
-        ActivityInfo("Swimming", "45 minutes", "1 km")
-    ))
+    private val _activityInfoList = MutableStateFlow<List<ActivityInfo>>(
+        listOf(
+            // 示例数据，实际应用中应从数据库获取
+            ActivityInfo("Running", "30 minutes", "", "", "5 km"),
+            ActivityInfo("Swimming", "45 minutes", "", "", "1 km")
+        )
+    )
     val activityInfoList: StateFlow<List<ActivityInfo>> = _activityInfoList
 
     // 实际应用中，加载数据的逻辑会从数据库获取

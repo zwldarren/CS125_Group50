@@ -13,6 +13,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -23,6 +24,7 @@ import com.cs125.group50.nav.BaseScreen
 import com.cs125.group50.viewmodel.DashboardViewModel
 import com.cs125.group50.viewmodel.DashboardViewModelFactory
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
 
 @Composable
 fun MenuScreen(navController: NavHostController, userId: String, context: Context) {
@@ -39,6 +41,7 @@ fun MenuScreen(navController: NavHostController, userId: String, context: Contex
 fun MenuScrollContent(navController: NavHostController, userId: String, context: Context) {
     val factory = DashboardViewModelFactory(context)
     val dashboardViewModel: DashboardViewModel = viewModel(factory = factory)
+    val coroutineScope = rememberCoroutineScope()
 
     val hasAllPermissions = dashboardViewModel.hasAllPermissions.collectAsState()
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -104,12 +107,14 @@ fun MenuScrollContent(navController: NavHostController, userId: String, context:
 
         Button(
             onClick = {
-                dashboardViewModel.synchronizeHealthData()
+                coroutineScope.launch {
+                    dashboardViewModel.synchronizeHealthData()
+                }
             },
             modifier = buttonModifier
         ) {
             Text("Synchronize Health Data")
         }
-        
+
     }
 }
