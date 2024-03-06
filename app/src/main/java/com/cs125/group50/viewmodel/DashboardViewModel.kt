@@ -29,6 +29,8 @@ import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 
 class DashboardViewModel(context: Context) : ViewModel() {
@@ -156,11 +158,13 @@ class DashboardViewModel(context: Context) : ViewModel() {
                 }
 
                 val sleepInfos = sleepRecords.map { record ->
+                    val dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.systemDefault())
                     SleepInfo(
                         duration = Duration.between(record.startTime, record.endTime).toMinutes()
                             .toString(),
                         startTime = record.startTime.toString(),
-                        endTime = record.endTime.toString()
+                        endTime = record.endTime.toString(),
+                        date = dateFormat.format(record.startTime)
                     )
                 }
 

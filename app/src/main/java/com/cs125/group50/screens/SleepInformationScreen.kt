@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -35,18 +37,21 @@ fun SleepInformationScreen(navController: NavHostController, userId: String) {
 @Composable
 fun SleepScrollContent(navController: NavHostController, userId: String) {
     val viewModel: SleepInformationViewModel = viewModel()
-    LaunchedEffect(true) {
-        viewModel.loadSleepInfo()
+    LaunchedEffect(userId) {
+        viewModel.loadSleepInfo(userId)
     }
     val sleepInfoList by viewModel.sleepInfoList.collectAsState()
 
-    Column(modifier = Modifier.padding(16.dp)) {
+    Column(modifier = Modifier
+        .verticalScroll(rememberScrollState())
+        .padding(16.dp)) {
+        Spacer(modifier = Modifier.height(48.dp))
         Text("Your Sleep Information", style = MaterialTheme.typography.headlineMedium)
 
         Spacer(modifier = Modifier.height(16.dp))
 
         sleepInfoList.forEach { sleepInfo ->
-            Text("Duration: ${sleepInfo.duration}, Start Time: ${sleepInfo.startTime}, End Time: ${sleepInfo.endTime}")
+            Text("Date: ${sleepInfo.date}, Start Time: ${sleepInfo.startTime}, End Time: ${sleepInfo.endTime}")
             Spacer(modifier = Modifier.height(8.dp))
         }
 
@@ -64,5 +69,6 @@ fun SleepScrollContent(navController: NavHostController, userId: String) {
         }) {
             Text("Back")
         }
+        Spacer(modifier = Modifier.height(60.dp))
     }
 }

@@ -78,7 +78,7 @@ fun SleepInputScreen(navController: NavHostController, userId: String) {
         Button(
             onClick = {
                 // Assuming viewModel has a method to save sleep data
-                viewModel.saveActivityInfo(userId,startTime,endTime,selectedDate)
+                viewModel.saveSleepInfo(userId,startTime,endTime,selectedDate)
                 navController.popBackStack()
             },
             // You could add validation to ensure end time is after start time, etc.

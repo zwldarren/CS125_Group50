@@ -6,7 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
+import java.time.Duration
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
 
 class SleepInputViewModel : ViewModel() {
@@ -14,11 +16,22 @@ class SleepInputViewModel : ViewModel() {
 
     private val db = Firebase.firestore
 
-    fun saveActivityInfo(userId: String, startTime: LocalTime, endTime: LocalTime, selectedDate: LocalDate) {
+    fun saveSleepInfo(userId: String, startTime: LocalTime, endTime: LocalTime, selectedDate: LocalDate) {
+        var startDateTime = LocalDateTime.of(selectedDate, startTime)
+        var endDateTime = LocalDateTime.of(selectedDate, endTime)
+
+        // 检查如果 startTime 晚于 endTime，假定 endTime 为第二天
+        if (startTime.isAfter(endTime)) {
+            endDateTime = endDateTime.plusDays(1)
+        }
+
+        val duration = Duration.between(startDateTime, endDateTime).toMinutes()
+
         val sleepInfo = hashMapOf(
             "date" to selectedDate.toString(),
             "startTime" to startTime.toString(),
-            "endTime" to endTime.toString()
+            "endTime" to endTime.toString(),
+            "duration" to duration.toString()
         )
 
         viewModelScope.launch {
