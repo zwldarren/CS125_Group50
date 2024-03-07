@@ -2,6 +2,7 @@ package com.cs125.group50.viewmodel
 
 import android.content.Context
 import android.os.RemoteException
+import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
@@ -21,6 +22,7 @@ import com.cs125.group50.data.HealthDataInfo
 import com.cs125.group50.data.HeartRateInfo
 import com.cs125.group50.data.SleepInfo
 import com.cs125.group50.data.UserInfo
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,6 +37,8 @@ import java.time.format.DateTimeFormatter
 
 class DashboardViewModel(context: Context) : ViewModel() {
     private val healthConnectManager: HealthConnectManager = HealthConnectManager(context)
+    val auth = FirebaseAuth.getInstance()
+    val userId = auth.currentUser?.uid.orEmpty()
 
     // define the permissions required to access the data, find the list of permissions here:
     // https://developer.android.com/reference/kotlin/androidx/health/connect/client/records/package-summary
@@ -144,6 +148,11 @@ class DashboardViewModel(context: Context) : ViewModel() {
                     )
                 }
 
+                //存数据库，activity
+                activityInfos.forEach { activityInfo ->
+                    saveActivityInfo(userId, activityInfo)
+                }
+
                 val dietInfos = dietRecords.map { record ->
                     DietInfo(
                         mealType = record.mealType.toString(),
@@ -154,6 +163,11 @@ class DashboardViewModel(context: Context) : ViewModel() {
                         date = "", // Assuming date needs to be parsed from startTime or a separate field
                         time = "" // Assuming time needs to be parsed from startTime or a separate field
                     )
+                }
+
+                //存数据库，diet
+                dietInfos.forEach { dietInfo ->
+                    saveDietInfo(userId, dietInfo)
                 }
 
                 val sleepInfos = sleepRecords.map { record ->
@@ -167,6 +181,11 @@ class DashboardViewModel(context: Context) : ViewModel() {
                     )
                 }
 
+                //存数据库，sleep
+                sleepInfos.forEach { sleepInfo ->
+                    saveSleepInfo(userId, sleepInfo)
+                }
+
                 val heartRateAggregate = healthConnectManager.aggregateHeartRate(startTime, endTime)
                 val heartRateInfos = listOf(
                     HeartRateInfo(
@@ -178,6 +197,11 @@ class DashboardViewModel(context: Context) : ViewModel() {
                     )
                 )
 
+                //存数据库，heart rate
+                heartRateInfos.forEach { heartRateInfo ->
+                    saveHeartRateInfo(userId, heartRateInfo)
+                }
+
                 val healthDataInfo =
                     HealthDataInfo(sleepInfos, dietInfos, activityInfos, heartRateInfos)
 
@@ -185,6 +209,83 @@ class DashboardViewModel(context: Context) : ViewModel() {
 
             }
         }
+    }
+
+    private val db = Firebase.firestore
+    fun saveActivityInfo(userId: String, activityInfo: ActivityInfo) {
+        val activityMap = hashMapOf(
+            "activityType" to activityInfo.activityType,
+            "duration" to activityInfo.duration,
+            "caloriesBurned" to activityInfo.caloriesBurned,
+            "date" to activityInfo.date
+            // 其他字段...
+        )
+        db.collection("users").document(userId).collection("activity")
+            .add(activityMap)
+            .addOnSuccessListener { documentReference ->
+                Log.d("DashboardViewModel", "ActivityInfo added with ID: ${documentReference.id}")
+            }
+            .addOnFailureListener { e ->
+                Log.w("DashboardViewModel", "Error adding ActivityInfo", e)
+            }
+    }
+
+    fun saveDietInfo(userId: String, dietInfo: DietInfo) {
+        val dietMap = hashMapOf(
+            "mealType" to dietInfo.mealType,
+            "foodName" to dietInfo.foodName,  // 假设这些信息已正确获取
+            "totalFat" to dietInfo.totalFat,
+            "caloriesPerHundredGrams" to dietInfo.caloriesPerHundredGrams,
+            "foodAmount" to dietInfo.foodAmount,
+            "date" to dietInfo.date,  // 你需要确保这个值在dietInfo对象创建时被正确设置
+            "time" to dietInfo.time   // 同上
+        )
+
+        db.collection("users").document(userId).collection("meals")
+            .add(dietMap)
+            .addOnSuccessListener { documentReference ->
+                Log.d("DashboardViewModel", "DietInfo added with ID: ${documentReference.id}")
+            }
+            .addOnFailureListener { e ->
+                Log.w("DashboardViewModel", "Error adding DietInfo", e)
+            }
+    }
+
+    fun saveSleepInfo(userId: String, sleepInfo: SleepInfo) {
+        val sleepMap = hashMapOf(
+            "duration" to sleepInfo.duration,
+            "startTime" to sleepInfo.startTime,
+            "endTime" to sleepInfo.endTime,
+            "date" to sleepInfo.date  // 确保这个值在SleepInfo对象创建时被正确设置
+        )
+
+        db.collection("users").document(userId).collection("sleep")
+            .add(sleepMap)
+            .addOnSuccessListener { documentReference ->
+                Log.d("DashboardViewModel", "SleepInfo added with ID: ${documentReference.id}")
+            }
+            .addOnFailureListener { e ->
+                Log.w("DashboardViewModel", "Error adding SleepInfo", e)
+            }
+    }
+
+    fun saveHeartRateInfo(userId: String, heartRateInfo: HeartRateInfo) {
+        val heartRateMap = hashMapOf(
+            "startTime" to heartRateInfo.startTime,
+            "endTime" to heartRateInfo.endTime,
+            "minimumHeartRate" to heartRateInfo.minimumHeartRate,
+            "maximumHeartRate" to heartRateInfo.maximumHeartRate,
+            "averageHeartRate" to heartRateInfo.averageHeartRate
+        )
+
+        db.collection("users").document(userId).collection("heartRate")
+            .add(heartRateMap)
+            .addOnSuccessListener { documentReference ->
+                Log.d("DashboardViewModel", "HeartRateInfo added with ID: ${documentReference.id}")
+            }
+            .addOnFailureListener { e ->
+                Log.w("DashboardViewModel", "Error adding HeartRateInfo", e)
+            }
     }
 
 }
