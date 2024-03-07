@@ -140,8 +140,7 @@ class DashboardViewModel(context: Context) : ViewModel() {
                         activityType = record["activityType"] ?: "",
                         duration = record["duration"] ?: "",
                         caloriesBurned = record["caloriesBurned"] ?: "",
-                        averageHeartRate = "", // This example does not integrate heart rate into ActivityInfo
-                        distance = "" // Assuming this information needs to be integrated separately
+                        date = "" //先这样
                     )
                 }
 

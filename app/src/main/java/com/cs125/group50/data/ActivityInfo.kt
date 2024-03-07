@@ -6,8 +6,7 @@ data class ActivityInfo(
     val activityType: String,
     val duration: String,
     val caloriesBurned: String,
-    val averageHeartRate: String,
-    val distance: String
+    val date: String
 )
 
 data class HeartRateInfo(
