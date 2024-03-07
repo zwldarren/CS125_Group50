@@ -1,6 +1,7 @@
 import java.util.Properties
 
 plugins {
+    id("com.chaquo.python")
     id("com.android.application")
     id("com.google.gms.google-services")
     id("org.jetbrains.kotlin.android")
@@ -66,6 +67,28 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
+    defaultConfig {
+        ndk {
+            // On Apple silicon, you can omit x86_64.
+            abiFilters += listOf("arm64-v8a", "x86_64")
+        }
+    }
+    flavorDimensions += "pyVersion"
+    productFlavors {
+        create("py310") { dimension = "pyVersion" }
+        create("py311") { dimension = "pyVersion" }
+    }
+}
+chaquopy {
+    productFlavors {
+        getByName("py310") { version = "3.10" }
+        getByName("py311") { version = "3.11" }
+    }
+    defaultConfig{
+        pip{
+            "firebase-admin"
         }
     }
 }

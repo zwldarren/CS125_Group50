@@ -1,2 +1,5 @@
-def helloword():
-    return "hello word"
+from .engine import Engine
+
+def main(argv):
+    engine = Engine(".")
+    engine.process_query(argv)
