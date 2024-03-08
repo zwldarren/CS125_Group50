@@ -86,14 +86,15 @@ chaquopy {
         getByName("py310") { version = "3.10" }
         getByName("py311") { version = "3.11" }
     }
-    defaultConfig{
-        pip{
+    defaultConfig {
+        pip {
             "firebase-admin"
         }
     }
 }
 
 dependencies {
+    implementation("com.google.code.gson:gson:2.10.1")
     implementation("androidx.compose.material3:material3:1.2.0")
     implementation("androidx.compose.material3:material3-window-size-class:1.2.0")
     implementation("androidx.compose.material3:material3-adaptive:1.0.0-alpha06")
