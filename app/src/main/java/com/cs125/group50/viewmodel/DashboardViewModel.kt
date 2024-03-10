@@ -15,7 +15,6 @@ import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.chaquo.python.Python
 import com.cs125.group50.data.ActivityInfo
 import com.cs125.group50.data.DietInfo
 import com.cs125.group50.data.HealthConnectManager
@@ -24,6 +23,7 @@ import com.cs125.group50.data.SleepInfo
 import com.cs125.group50.data.UserInfo
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.functions.ktx.functions
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,6 +34,7 @@ import java.time.temporal.ChronoUnit
 
 class DashboardViewModel(context: Context) : ViewModel() {
     private val healthConnectManager: HealthConnectManager = HealthConnectManager(context)
+    val functions = Firebase.functions
     val auth = FirebaseAuth.getInstance()
     val userId = auth.currentUser?.uid.orEmpty()
 
@@ -122,101 +123,37 @@ class DashboardViewModel(context: Context) : ViewModel() {
     suspend fun synchronizeHealthData() {
         viewModelScope.launch {
             if (healthConnectManager.hasAllPermissions(requiredPermissions)) {
-                val python = Python.getInstance()
-                val pythonFile = python.getModule("main")
-
                 val endTime: Instant = Instant.now()
                 val startTime: Instant = endTime.minus(30, ChronoUnit.DAYS)
+
                 val sleepRecords = healthConnectManager.readSleepRecords(startTime, endTime)
+                val exerciseRecord = healthConnectManager.readExerciseRecords(startTime, endTime)
+                val dietRecords = healthConnectManager.readDietRecords(startTime, endTime)
+                val heartRateRecords = healthConnectManager.readHeartRateRecords(startTime, endTime)
+                val totalCaloriesBurnedRecords = healthConnectManager.readTotalCaloriesBurnedRecords(startTime, endTime)
 
-                val result = pythonFile.callAttr("main", sleepRecords)
+                val dataToSend = mapOf(
+                    "sleepRecords" to sleepRecords,
+                    "exerciseRecord" to exerciseRecord,
+                    "dietRecords" to dietRecords,
+                    "heartRateRecords" to heartRateRecords,
+                    "totalCaloriesBurnedRecords" to totalCaloriesBurnedRecords
+                )
+                functions
+                    .getHttpsCallable("synchronizeHealthData")
+                    .call(dataToSend)
+                    .addOnSuccessListener { result ->
+                        // success
+                        Log.d("CloudFunctions", "Function result: ${result.data}")
+                    }
+                    .addOnFailureListener { e ->
+                        // error
+                        Log.w("CloudFunctions", "Function error: ", e)
+                    }
+
+            } else {
+                // handle the case where the app does not have the required permissions
             }
-
-//            if (healthConnectManager.hasAllPermissions(requiredPermissions)) {
-//                val endTime: Instant = Instant.now()
-//                val startTime: Instant = endTime.minus(30, ChronoUnit.DAYS)
-//
-//                // Fetching all records
-//                val exerciseRecords = healthConnectManager.readExerciseRecords(startTime, endTime)
-//                val dietRecords = healthConnectManager.readDietRecords(startTime, endTime)
-//                val sleepRecords = healthConnectManager.readSleepRecords(startTime, endTime)
-//                val heartRateRecords = healthConnectManager.readHeartRateRecords(startTime, endTime)
-//
-//                // Converting records to data class instances
-//                val activityInfos = healthConnectManager.integrateExerciseData(
-//                    exerciseRecords,
-//                    healthConnectManager.readTotalCaloriesBurnedRecords(startTime, endTime),
-//                    heartRateRecords
-//                ).map { record ->
-//                    ActivityInfo(
-//                        activityType = record["activityType"] ?: "",
-//                        duration = record["duration"] ?: "",
-//                        caloriesBurned = record["caloriesBurned"] ?: "",
-//                        date = "" //先这样
-//                    )
-//                }
-//
-//                //存数据库，activity
-//                activityInfos.forEach { activityInfo ->
-//                    saveActivityInfo(userId, activityInfo)
-//                }
-//
-//                val dietInfos = dietRecords.map { record ->
-//                    DietInfo(
-//                        mealType = record.mealType.toString(),
-//                        foodName = "", // This example assumes food name is not directly available from record
-//                        totalFat = record.totalFat?.inGrams.toString(),
-//                        caloriesPerHundredGrams = record.energy?.inCalories.toString(),
-//                        foodAmount = "", // Assuming this information needs to be integrated separately
-//                        date = "", // Assuming date needs to be parsed from startTime or a separate field
-//                        time = "" // Assuming time needs to be parsed from startTime or a separate field
-//                    )
-//                }
-//
-//                //存数据库，diet
-//                dietInfos.forEach { dietInfo ->
-//                    saveDietInfo(userId, dietInfo)
-//                }
-//
-//                val sleepInfos = sleepRecords.map { record ->
-//                    val dateFormat =
-//                        DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.systemDefault())
-//                    SleepInfo(
-//                        duration = Duration.between(record.startTime, record.endTime).toMinutes()
-//                            .toString(),
-//                        startTime = record.startTime.toString(),
-//                        endTime = record.endTime.toString(),
-//                        date = dateFormat.format(record.startTime)
-//                    )
-//                }
-//
-//                //存数据库，sleep
-//                sleepInfos.forEach { sleepInfo ->
-//                    saveSleepInfo(userId, sleepInfo)
-//                }
-//
-//                val heartRateAggregate = healthConnectManager.aggregateHeartRate(startTime, endTime)
-//                val heartRateInfos = listOf(
-//                    HeartRateInfo(
-//                        startTime = heartRateAggregate["startTime"] ?: "",
-//                        endTime = heartRateAggregate["endTime"] ?: "",
-//                        minimumHeartRate = heartRateAggregate["minimumHeartRate"] ?: "",
-//                        maximumHeartRate = heartRateAggregate["maximumHeartRate"] ?: "",
-//                        averageHeartRate = heartRateAggregate["averageHeartRate"] ?: ""
-//                    )
-//                )
-//
-//                //存数据库，heart rate
-//                heartRateInfos.forEach { heartRateInfo ->
-//                    saveHeartRateInfo(userId, heartRateInfo)
-//                }
-//
-//                val healthDataInfo =
-//                    HealthDataInfo(sleepInfos, dietInfos, activityInfos, heartRateInfos)
-//                println()
-//            } else {
-//
-//            }
         }
     }
 

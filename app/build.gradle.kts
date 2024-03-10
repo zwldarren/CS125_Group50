@@ -102,6 +102,7 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:21.0.0")
     implementation("androidx.compose.material3:material3-android:1.2.1")
     implementation("androidx.benchmark:benchmark-common:1.2.3")
+    implementation("com.google.firebase:firebase-functions-ktx:20.4.0")
     val composeBom = platform("androidx.compose:compose-bom:2024.02.00")
     implementation(composeBom)
     debugImplementation("androidx.compose.ui:ui-tooling")
