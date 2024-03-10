@@ -142,6 +142,7 @@ class DashboardViewModel(context: Context) : ViewModel() {
                 val activeCaloriesBurnedRecord = healthConnectManager.readActiveCaloriesBurnedRecords(startTime, endTime)
 
                 val dataToSend = HealthData(
+                    userId = userId,
                     sleepRecords = sleepRecords,
                     exerciseRecord = exerciseRecord,
                     dietRecords = dietRecords,
@@ -155,21 +156,21 @@ class DashboardViewModel(context: Context) : ViewModel() {
                 call.enqueue(object : retrofit2.Callback<Void> {
                     override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
                         if (response.isSuccessful) {
-                            // 发送数据到服务器成功
+                            // server successfully received the data
                             Log.d("ApiResponse", "Success: Data sent successfully")
                         } else {
-                            // 服务器返回错误
+                            // server returned an error
                             Log.d("ApiResponse", "Error: ${response.errorBody()?.string()}")
                         }
                     }
 
                     override fun onFailure(call: Call<Void>, t: Throwable) {
-                        // 请求失败处理
+                        // request failed
                         Log.d("ApiResponse", "Failure: ${t.message}")
                     }
                 })
             } else {
-                // 处理未授权情况
+                // required permissions are not granted
                 Log.d("Permissions", "Required permissions are not granted.")
             }
         }

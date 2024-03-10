@@ -20,7 +20,6 @@ import androidx.health.connect.client.request.ChangesTokenRequest
 import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import java.io.IOException
@@ -72,88 +71,70 @@ class HealthConnectManager(private val context: Context) {
     suspend fun readExerciseRecords(
         startTime: Instant,
         endTime: Instant
-    ): String {
+    ): List<ExerciseSessionRecord> {
         val request = ReadRecordsRequest(
             recordType = ExerciseSessionRecord::class,
             timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
         )
         val response = healthConnectClient.readRecords(request)
-        val records = response.records
-
-        val type = object : TypeToken<List<ExerciseSessionRecord>>() {}.type
-        return gson.toJson(records, type)
+        return response.records
     }
 
     suspend fun readDietRecords(
         startTime: Instant,
         endTime: Instant
-    ): String {
+    ): List<NutritionRecord> {
         val request = ReadRecordsRequest(
             recordType = NutritionRecord::class,
             timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
         )
         val response = healthConnectClient.readRecords(request)
-        val records = response.records
-
-        val type = object : TypeToken<List<NutritionRecord>>() {}.type
-        return gson.toJson(records, type)
+        return response.records
     }
 
     suspend fun readSleepRecords(
         startTime: Instant,
         endTime: Instant
-    ): String {
+    ): List<SleepSessionRecord> {
         val request = ReadRecordsRequest(
             recordType = SleepSessionRecord::class,
             timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
         )
         val response = healthConnectClient.readRecords(request)
-        val records = response.records
-
-        val type = object : TypeToken<List<SleepSessionRecord>>() {}.type
-        return gson.toJson(records, type)
+        return response.records
     }
 
     suspend fun readTotalCaloriesBurnedRecords(
         startTime: Instant,
         endTime: Instant
-    ): String {
+    ): List<TotalCaloriesBurnedRecord> {
         val request = ReadRecordsRequest(
             recordType = TotalCaloriesBurnedRecord::class,
             timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
         )
         val response = healthConnectClient.readRecords(request)
-        val records = response.records
-
-        val type = object : TypeToken<List<TotalCaloriesBurnedRecord>>() {}.type
-        return gson.toJson(records, type)
+        return response.records
     }
 
     suspend fun readHeartRateRecords(
         startTime: Instant,
         endTime: Instant
-    ): String {
+    ): List<HeartRateRecord> {
         val request = ReadRecordsRequest(
             recordType = HeartRateRecord::class,
             timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
         )
         val response = healthConnectClient.readRecords(request)
-        val records = response.records
-
-        val type = object : TypeToken<List<HeartRateRecord>>() {}.type
-        return gson.toJson(records, type)
+        return response.records
     }
 
-    suspend fun readActiveCaloriesBurnedRecords(startTime: Instant, endTime: Instant): String {
+    suspend fun readActiveCaloriesBurnedRecords(startTime: Instant, endTime: Instant): List<ActiveCaloriesBurnedRecord> {
         val request = ReadRecordsRequest(
             recordType = ActiveCaloriesBurnedRecord::class,
             timeRangeFilter = TimeRangeFilter.between(startTime, endTime),
         )
         val response = healthConnectClient.readRecords(request)
-        val records = response.records
-
-        val type = object : TypeToken<List<ActiveCaloriesBurnedRecord>>() {}.type
-        return gson.toJson(records, type)
+        return response.records
     }
 
     suspend fun integrateExerciseData(
