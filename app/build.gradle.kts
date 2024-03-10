@@ -7,12 +7,12 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 fun loadProperties(): Properties {
-    val properties = Properties()
-    val propFile = file("local.properties")
-    if (propFile.exists()) {
-        propFile.inputStream().use { properties.load(it) }
+    val props = Properties()
+    val propsFile = rootProject.file("local.properties")
+    if (propsFile.exists()) {
+        propsFile.inputStream().use { props.load(it) }
     }
-    return properties
+    return props
 }
 android {
     namespace = "com.cs125.group50"
@@ -39,6 +39,11 @@ android {
             "String",
             "GOOGLE_SIGN_IN_CLIENT_ID",
             "\"${loadProperties()["GOOGLE_SIGN_IN_CLIENT_ID"]}\""
+        )
+        buildConfigField(
+            "String",
+            "BASE_URL",
+            "\"${loadProperties()["BASE_URL"]}\""
         )
     }
 
@@ -92,6 +97,8 @@ chaquopy {
 }
 
 dependencies {
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("androidx.health.connect:connect-client:1.0.0-alpha11")
     implementation("androidx.credentials:credentials:1.3.0-alpha01")

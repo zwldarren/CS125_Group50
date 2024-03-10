@@ -6,7 +6,6 @@ import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
-import androidx.health.connect.client.records.BodyFatRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.NutritionRecord
@@ -18,9 +17,11 @@ import androidx.lifecycle.viewModelScope
 import com.cs125.group50.data.ActivityInfo
 import com.cs125.group50.data.DietInfo
 import com.cs125.group50.data.HealthConnectManager
+import com.cs125.group50.data.HealthData
 import com.cs125.group50.data.HeartRateInfo
 import com.cs125.group50.data.SleepInfo
 import com.cs125.group50.data.UserInfo
+import com.cs125.group50.utils.ApiService
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.functions.ktx.functions
@@ -28,6 +29,9 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import retrofit2.Call
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -37,6 +41,11 @@ class DashboardViewModel(context: Context) : ViewModel() {
     val functions = Firebase.functions
     val auth = FirebaseAuth.getInstance()
     val userId = auth.currentUser?.uid.orEmpty()
+    val retrofit = Retrofit.Builder()
+        .baseUrl("http://localhost/")
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
 
     // define the permissions required to access the data, find the list of permissions here:
     // https://developer.android.com/reference/kotlin/androidx/health/connect/client/records/package-summary
@@ -45,9 +54,8 @@ class DashboardViewModel(context: Context) : ViewModel() {
         HealthPermission.getReadPermission(SleepSessionRecord::class),
         HealthPermission.getReadPermission(ExerciseSessionRecord::class),
         HealthPermission.getReadPermission(ActiveCaloriesBurnedRecord::class),
-        HealthPermission.getReadPermission(BodyFatRecord::class),
         HealthPermission.getReadPermission(NutritionRecord::class),
-        HealthPermission.getReadPermission(TotalCaloriesBurnedRecord::class)
+        HealthPermission.getReadPermission(TotalCaloriesBurnedRecord::class),
     )
     val healthConnectAvailability = healthConnectManager.availability
     var hasAllPermissions: MutableStateFlow<Boolean> = MutableStateFlow(false)
@@ -123,7 +131,6 @@ class DashboardViewModel(context: Context) : ViewModel() {
     suspend fun synchronizeHealthData() {
         viewModelScope.launch {
             if (healthConnectManager.hasAllPermissions(requiredPermissions)) {
-//                functions.useEmulator("127.0.0.1", 5001)
                 val endTime: Instant = Instant.now()
                 val startTime: Instant = endTime.minus(30, ChronoUnit.DAYS)
 
@@ -134,28 +141,36 @@ class DashboardViewModel(context: Context) : ViewModel() {
                 val totalCaloriesBurnedRecords = healthConnectManager.readTotalCaloriesBurnedRecords(startTime, endTime)
                 val activeCaloriesBurnedRecord = healthConnectManager.readActiveCaloriesBurnedRecords(startTime, endTime)
 
-                val dataToSend = mapOf(
-                    "sleepRecords" to sleepRecords,
-                    "exerciseRecord" to exerciseRecord,
-                    "dietRecords" to dietRecords,
-                    "heartRateRecords" to heartRateRecords,
-                    "totalCaloriesBurnedRecords" to totalCaloriesBurnedRecords,
-                    "activeCaloriesBurnedRecord" to activeCaloriesBurnedRecord
+                val dataToSend = HealthData(
+                    sleepRecords = sleepRecords,
+                    exerciseRecord = exerciseRecord,
+                    dietRecords = dietRecords,
+                    heartRateRecords = heartRateRecords,
+                    totalCaloriesBurnedRecords = totalCaloriesBurnedRecords,
+                    activeCaloriesBurnedRecord = activeCaloriesBurnedRecord
                 )
-                functions
-                    .getHttpsCallable("synchronizeHealthData")
-                    .call(dataToSend)
-                    .addOnSuccessListener { result ->
-                        // success
-                        Log.d("CloudFunctions", "Function result: ${result.data}")
-                    }
-                    .addOnFailureListener { e ->
-                        // error
-                        Log.w("CloudFunctions", "Function error: ", e)
+                val service = ApiService.getHealthDataService()
+                val call = service.synchronizeHealthData(dataToSend)
+
+                call.enqueue(object : retrofit2.Callback<Void> {
+                    override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
+                        if (response.isSuccessful) {
+                            // 发送数据到服务器成功
+                            Log.d("ApiResponse", "Success: Data sent successfully")
+                        } else {
+                            // 服务器返回错误
+                            Log.d("ApiResponse", "Error: ${response.errorBody()?.string()}")
+                        }
                     }
 
+                    override fun onFailure(call: Call<Void>, t: Throwable) {
+                        // 请求失败处理
+                        Log.d("ApiResponse", "Failure: ${t.message}")
+                    }
+                })
             } else {
-                // handle the case where the app does not have the required permissions
+                // 处理未授权情况
+                Log.d("Permissions", "Required permissions are not granted.")
             }
         }
     }
