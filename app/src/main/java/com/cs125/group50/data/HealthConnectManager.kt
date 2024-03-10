@@ -5,6 +5,7 @@ import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.compose.runtime.mutableStateOf
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.changes.Change
+import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.NutritionRecord
@@ -140,6 +141,18 @@ class HealthConnectManager(private val context: Context) {
         val records = response.records
 
         val type = object : TypeToken<List<HeartRateRecord>>() {}.type
+        return gson.toJson(records, type)
+    }
+
+    suspend fun readActiveCaloriesBurnedRecords(startTime: Instant, endTime: Instant): String {
+        val request = ReadRecordsRequest(
+            recordType = ActiveCaloriesBurnedRecord::class,
+            timeRangeFilter = TimeRangeFilter.between(startTime, endTime),
+        )
+        val response = healthConnectClient.readRecords(request)
+        val records = response.records
+
+        val type = object : TypeToken<List<ActiveCaloriesBurnedRecord>>() {}.type
         return gson.toJson(records, type)
     }
 

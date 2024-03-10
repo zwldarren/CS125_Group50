@@ -123,6 +123,7 @@ class DashboardViewModel(context: Context) : ViewModel() {
     suspend fun synchronizeHealthData() {
         viewModelScope.launch {
             if (healthConnectManager.hasAllPermissions(requiredPermissions)) {
+//                functions.useEmulator("127.0.0.1", 5001)
                 val endTime: Instant = Instant.now()
                 val startTime: Instant = endTime.minus(30, ChronoUnit.DAYS)
 
@@ -131,13 +132,15 @@ class DashboardViewModel(context: Context) : ViewModel() {
                 val dietRecords = healthConnectManager.readDietRecords(startTime, endTime)
                 val heartRateRecords = healthConnectManager.readHeartRateRecords(startTime, endTime)
                 val totalCaloriesBurnedRecords = healthConnectManager.readTotalCaloriesBurnedRecords(startTime, endTime)
+                val activeCaloriesBurnedRecord = healthConnectManager.readActiveCaloriesBurnedRecords(startTime, endTime)
 
                 val dataToSend = mapOf(
                     "sleepRecords" to sleepRecords,
                     "exerciseRecord" to exerciseRecord,
                     "dietRecords" to dietRecords,
                     "heartRateRecords" to heartRateRecords,
-                    "totalCaloriesBurnedRecords" to totalCaloriesBurnedRecords
+                    "totalCaloriesBurnedRecords" to totalCaloriesBurnedRecords,
+                    "activeCaloriesBurnedRecord" to activeCaloriesBurnedRecord
                 )
                 functions
                     .getHttpsCallable("synchronizeHealthData")
