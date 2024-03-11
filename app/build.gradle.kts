@@ -5,6 +5,7 @@ plugins {
     id("com.android.application")
     id("com.google.gms.google-services")
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.5.0"
 }
 fun loadProperties(): Properties {
     val props = Properties()
@@ -97,6 +98,7 @@ chaquopy {
 }
 
 dependencies {
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.google.code.gson:gson:2.10.1")
