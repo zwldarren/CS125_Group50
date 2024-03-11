@@ -20,6 +20,7 @@ import com.cs125.group50.data.HealthConnectManager
 import com.cs125.group50.data.HealthData
 import com.cs125.group50.data.HeartRateInfo
 import com.cs125.group50.data.SleepInfo
+import com.cs125.group50.data.SleepStage
 import com.cs125.group50.data.UserInfo
 import com.cs125.group50.utils.ApiService
 import com.google.firebase.auth.FirebaseAuth
@@ -32,7 +33,9 @@ import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.time.Duration
 import java.time.Instant
+import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 
 
@@ -137,18 +140,68 @@ class DashboardViewModel(context: Context) : ViewModel() {
                 val sleepRecords = healthConnectManager.readSleepRecords(startTime, endTime)
                 val exerciseRecord = healthConnectManager.readExerciseRecords(startTime, endTime)
                 val dietRecords = healthConnectManager.readDietRecords(startTime, endTime)
-                val heartRateRecords = healthConnectManager.readHeartRateRecords(startTime, endTime)
                 val totalCaloriesBurnedRecords = healthConnectManager.readTotalCaloriesBurnedRecords(startTime, endTime)
                 val activeCaloriesBurnedRecord = healthConnectManager.readActiveCaloriesBurnedRecords(startTime, endTime)
 
+
+                // Converting records to data class instances
+                val activityInfos = healthConnectManager
+                    .integrateExerciseData(exerciseRecord, totalCaloriesBurnedRecords)
+                    .map { record ->
+                        ActivityInfo(
+                            activityType = record["activityType"] ?: "",
+                            duration = record["duration"] ?: "",
+                            caloriesBurned = record["caloriesBurned"] ?: "",
+                            date = record["date"] ?: ""
+                        )
+                }
+
+                val dietInfos = dietRecords.map { record ->
+                    DietInfo(
+                        mealType = record.mealType.toString(),
+                        foodName = "",
+                        totalFat = record.totalFat?.inGrams.toString(),
+                        caloriesPerHundredGrams = record.energy?.inKilocalories.toString(),
+                        foodAmount = "",
+                        date = record.startTime.atZone(ZoneId.of("America/Los_Angeles")).toLocalDate().toString(),
+                        time = record.startTime.atZone(ZoneId.of("America/Los_Angeles")).toLocalTime().toString(),
+                    )
+                }
+
+                val sleepInfos = sleepRecords.map { record ->
+                    val serializableStages = record.stages.map { stage ->
+                        SleepStage(
+                            endTime = stage.endTime.toString(),
+                            stage = stage.stage,
+                            startTime = stage.startTime.toString()
+                        )
+                    }
+                    SleepInfo(
+                        duration = Duration.between(record.startTime, record.endTime).toMinutes().toString(),
+                        startTime = record.startTime.atZone(ZoneId.of("America/Los_Angeles")).toLocalTime().toString(),
+                        endTime = record.endTime.atZone(ZoneId.of("America/Los_Angeles")).toLocalTime().toString(),
+                        date = record.startTime.atZone(ZoneId.of("America/Los_Angeles")).toLocalDate().toString(),
+                        stages = serializableStages
+                    )
+                }
+
+                val heartRateAggregate = healthConnectManager.aggregateHeartRate(startTime, endTime)
+                val heartRateInfos = listOf(
+                    HeartRateInfo(
+                        startTime = heartRateAggregate["startTime"] ?: "",
+                        endTime = heartRateAggregate["endTime"] ?: "",
+                        minimumHeartRate = heartRateAggregate["minimumHeartRate"] ?: "",
+                        maximumHeartRate = heartRateAggregate["maximumHeartRate"] ?: "",
+                        averageHeartRate = heartRateAggregate["averageHeartRate"] ?: ""
+                    )
+                )
+
                 val dataToSend = HealthData(
                     userId = userId,
-                    sleepRecords = sleepRecords,
-                    exerciseRecord = exerciseRecord,
-                    dietRecords = dietRecords,
-                    heartRateRecords = heartRateRecords,
-                    totalCaloriesBurnedRecords = totalCaloriesBurnedRecords,
-                    activeCaloriesBurnedRecord = activeCaloriesBurnedRecord
+                    sleepRecords = sleepInfos,
+                    exerciseRecord = activityInfos,
+                    dietRecords = dietInfos,
+                    heartRateRecords = heartRateInfos,
                 )
                 val service = ApiService.getHealthDataService()
                 val call = service.synchronizeHealthData(dataToSend)

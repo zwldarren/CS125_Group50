@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.flow
 import java.io.IOException
 import java.time.Duration
 import java.time.Instant
+import java.time.ZoneId
 
 
 class HealthConnectManager(private val context: Context) {
@@ -140,7 +141,6 @@ class HealthConnectManager(private val context: Context) {
     suspend fun integrateExerciseData(
         exerciseRecords: List<ExerciseSessionRecord>,
         caloriesRecords: List<TotalCaloriesBurnedRecord>,
-        heartRateRecords: List<HeartRateRecord>
     ): List<Map<String, String?>> {
         return exerciseRecords.map { exerciseRecord ->
             val exerciseDuration = Duration.between(
@@ -149,24 +149,13 @@ class HealthConnectManager(private val context: Context) {
             )
             val caloriesBurnedDuringExercise = caloriesRecords.filter {
                 it.startTime >= exerciseRecord.startTime && it.endTime <= exerciseRecord.endTime
-            }.sumOf { it.energy.inCalories }
+            }.sumOf { it.energy.inKilocalories }
 
             mapOf(
                 "activityType" to exerciseRecord.exerciseType.toString(),
                 "duration" to exerciseDuration.toMinutes().toString(),
                 "caloriesBurned" to caloriesBurnedDuringExercise.toString(),
-            )
-        }
-    }
-
-    suspend fun filterNutritionRecords(
-        records: List<NutritionRecord>
-    ): List<Map<String, String?>> {
-        return records.map { record ->
-            mapOf(
-                "mealType" to record.mealType.toString(),
-                "totalFat" to record.totalFat?.inGrams.toString(),
-                "energy" to record.energy?.inCalories.toString(),
+                "date" to exerciseRecord.startTime.atZone(ZoneId.of("America/Los_Angeles")).toLocalDate().toString(),
             )
         }
     }
@@ -197,7 +186,7 @@ class HealthConnectManager(private val context: Context) {
                 )
             )
             // Convert total energy to kilocalories, may be null if no data is available
-            response[TotalCaloriesBurnedRecord.ENERGY_TOTAL]?.inCalories ?: 0.0
+            response[TotalCaloriesBurnedRecord.ENERGY_TOTAL]?.inKilocalories ?: 0.0
         } catch (e: Exception) {
             0.0 // Or handle error more appropriately
         }
