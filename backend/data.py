@@ -1,5 +1,6 @@
 from typing import List
 from pydantic import BaseModel
+from datetime import datetime
 
 
 class HealthData(BaseModel):
@@ -17,6 +18,27 @@ class SleepStructure:
         self._start_time = start_time
         self._end_time = end_time
         self._stages = stages
+        self._stage_percentages = self._preprocess_stage(stages)
+
+    def _preprocess_stage(self, sleep_data):
+        if not sleep_data:
+            return None
+        for entry in sleep_data:
+            entry['duration'] = (datetime.fromisoformat(entry['endTime']) - datetime.fromisoformat(
+                entry['startTime'])).total_seconds()
+
+        total_sleep_time = sum(entry['duration'] for entry in sleep_data)
+
+        stage_durations = {}
+        for entry in sleep_data:
+            stage_key = str(entry['stage'])  # 转换键为字符串
+            if stage_key not in stage_durations:
+                stage_durations[stage_key] = entry['duration']
+            else:
+                stage_durations[stage_key] += entry['duration']
+
+        stage_percentages = {stage: (duration / total_sleep_time) for stage, duration in stage_durations.items()}
+        return stage_percentages
 
     def sleep_dict(self):
         db_dict = {
@@ -24,7 +46,8 @@ class SleepStructure:
             "duration": self._duration,
             "endTime": self._end_time,
             "stages": self._stages,
-            "startTime": self._start_time
+            "startTime": self._start_time,
+            "stagePercentages": self._stage_percentages
         }
         return db_dict
 
