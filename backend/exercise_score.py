@@ -1,20 +1,20 @@
 def calculate_bmr(weight, height, age, gender):
     if gender == 'male':
-        bmr = 10 * weight + 6.25 * height - 5 * age + 5
+        bmr = (10 * weight + 6.25 * height - 5 * age + 5) * 1000
     else:  # female
-        bmr = 10 * weight + 6.25 * height - 5 * age - 161
+        bmr = (10 * weight + 6.25 * height - 5 * age - 161) * 1000
     return bmr
 
 def calculate_tdee(bmr, average_calories_burned_per_week):
     # 考虑到运动手表的会记录包括轻微活动如步行，因此主要判断条件是日平均消耗卡路里
     daily_average_calories_burned = average_calories_burned_per_week / 7
-    if daily_average_calories_burned < 200:
+    if daily_average_calories_burned < 200000:
         activity_level = 'sedentary'
-    elif 200 <= daily_average_calories_burned < 400:
+    elif 200 <= daily_average_calories_burned < 400000:
         activity_level = 'light'
-    elif 400 <= daily_average_calories_burned < 600:
+    elif 400 <= daily_average_calories_burned < 600000:
         activity_level = 'moderate'
-    elif 600 <= daily_average_calories_burned < 800:
+    elif 600 <= daily_average_calories_burned < 800000:
         activity_level = 'active'
     else:
         activity_level = 'very_active'
@@ -33,25 +33,25 @@ def calculate_score(tdee, calorie_intake, calorie_burn):
     calorie_difference = calorie_intake - (tdee - calorie_burn)
     abs_diff = abs(calorie_difference)
     
-    if abs_diff > 2000:
+    if abs_diff > 2000000:
         score = 10
-    elif abs_diff > 1800:
+    elif abs_diff > 1800000:
         score = 9
-    elif abs_diff > 1600:
+    elif abs_diff > 1600000:
         score = 8
-    elif abs_diff > 1400:
+    elif abs_diff > 1400000:
         score = 7
-    elif abs_diff > 1200:
+    elif abs_diff > 1200000:
         score = 6
-    elif abs_diff > 1000:
+    elif abs_diff > 1000000:
         score = 5
-    elif abs_diff > 800:
+    elif abs_diff > 800000:
         score = 4
-    elif abs_diff > 600:
+    elif abs_diff > 600000:
         score = 3
-    elif abs_diff > 400:
+    elif abs_diff > 400000:
         score = 2
-    elif abs_diff > 200:
+    elif abs_diff > 200000:
         score = 1
     else:
         score = 0  # 健康范围内
@@ -67,11 +67,11 @@ gender = 'male'
 # exercise_days_per_week = 7  # 用户每周运动天数，假设每天都有活动
 # 冗余参数
 
-average_calories_burned_per_week = 1400  # 用户每周平均运动消耗的卡路里
+average_calories_burned_per_week = 1400000  # 用户每周平均运动消耗的卡路里
 # 实际应用中是读取过去7天的所有运动，然后计算这些运动的消耗卡路里总和
 
-calorie_intake = 2500  # 用户每日摄入卡路里
-calorie_burn = 200  # 用户每日通过运动消耗的卡路里
+calorie_intake = 250000  # 用户每日摄入卡路里
+calorie_burn = 200000  # 用户每日通过运动消耗的卡路里
 
 bmr = calculate_bmr(weight, height, age, gender)
 tdee = calculate_tdee(bmr, average_calories_burned_per_week)
