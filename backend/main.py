@@ -7,6 +7,8 @@ from sleep_processor import SleepProcessor
 from diet_score import *
 from diet_score import get_diet_score
 from firebase_processor import FirebaseService
+from exercise_score import *
+from exercise_score import get_exercise_score
 
 from sleep_score import calculate_sleep_score
 
@@ -142,6 +144,8 @@ async def update_recommendation(user_id):
         sleep_day = sleep_processor.get_latest_sleep_time()
         sleep_infos = sleep_processor.get_sleep_last_7_days(sleep_day)
         sleep_score = sum(item['sleepScore'] for item in sleep_infos) / len(sleep_infos)
+
+        exercise_score, calorie_difference = get_exercise_score(weight, height, age, gender, average_calories_burned_per_week, calorie_intake, calorie_burn)
 
         return {
             "overall_recommendation": overall_recommendation,
