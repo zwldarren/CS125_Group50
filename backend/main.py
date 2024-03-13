@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from fastapi import FastAPI, Path
 import data
 import joblib
@@ -9,6 +11,9 @@ from diet_score import get_diet_score
 from firebase_processor import FirebaseService
 from exercise_score import *
 from exercise_score import get_exercise_score
+from sleep_recommendation import generate_sleep_advice
+from diet_recommendation import generate_diet_advice
+from exercise_recommendation import generate_exercise_advice
 
 from overall_recommendation import calculate_overall_health_score
 from overall_recommendation import provide_final_recommendation
@@ -116,9 +121,6 @@ async def update_recommendation(user_id):
         meals_processor = MealProcessor(db, user_id)
         sleep_processor = SleepProcessor(db, user_id)
 
-        # get recommendation, 假demo
-        overall_recommendation, exercise_recommendation, sleep_recommendation, diet_recommendation = activity_processor.generate_overall_recommendation()
-
         latest_meal_date = meals_processor.get_latest_meal_time()
         date_info = meals_processor.get_certain_date_info(latest_meal_date)
         extracted_times = [d['time'] for d in date_info]
@@ -148,11 +150,34 @@ async def update_recommendation(user_id):
         sleep_day = sleep_processor.get_latest_sleep_time()
         sleep_infos = sleep_processor.get_sleep_last_7_days(sleep_day)
         sleep_score = sum(item['sleepScore'] for item in sleep_infos) / len(sleep_infos)
+        sleep_score = sleep_score / 10.0
 
         exercise_score, calorie_difference = get_exercise_score(weight, height, age, gender, average_calories_burned_per_week, calorie_intake, calorie_burn)
 
-        overall_score = calculate_overall_health_score(sleep_day, diet_score, exercise_score, goal)
+        overall_score = calculate_overall_health_score(sleep_score, diet_score, exercise_score, goal)
         overall_recommendation = provide_final_recommendation(overall_score, goal)
+
+        start_times = [datetime.strptime(entry['startTime'], '%H:%M') for entry in sleep_infos]
+        adjusted_time_differences = []
+        for i in range(len(start_times)):
+            for j in range(i + 1, len(start_times)):
+                time_difference = calculate_adjusted_time_difference(start_times[i], start_times[j])
+                adjusted_time_differences.append(time_difference)
+
+        max_start_time_variance = max(adjusted_time_differences)
+
+        total_sleep_duration = sum(int(entry['duration']) for entry in sleep_infos)
+        unique_dates = len(set(entry['date'] for entry in sleep_infos))
+        total_sleep_number = len(sleep_infos)
+        sleep_times_per_day = total_sleep_number / unique_dates
+        average_sleep_per_day = (total_sleep_duration / unique_dates) / 60
+
+        sleep_recommendation = generate_sleep_advice(sleep_score, max_start_time_variance, sleep_times_per_day, average_sleep_per_day)
+
+        diet_recommendation = generate_diet_advice(diet_score, calorie_difference, extracted_hours_minutes)
+
+        weekly_exercise_sessions_number = len(activity_info)
+        exercise_recommendation = generate_exercise_advice(exercise_score, weekly_exercise_sessions_number, calorie_difference)
 
         return {
             "overall_recommendation": overall_recommendation,
@@ -167,3 +192,14 @@ async def update_recommendation(user_id):
     except Exception as e:
         print(f"ERROR: {e}")
         return {"message": "Failed to generate recommendation"}
+
+def calculate_adjusted_time_difference(time1, time2):
+    difference = time2 - time1
+    if difference.days < 0:
+        difference = timedelta(days=1) + difference
+
+    difference_in_hours = difference.total_seconds() / 3600
+
+    if difference_in_hours > 12:
+        difference_in_hours = 24 - difference_in_hours
+    return difference_in_hours

@@ -1,7 +1,6 @@
 #enough_info 是Boolean, 其他都是int, 这些都是提取用户过去五天，然后得出, duration为hour，start_time_variance也为hour
-def generate_diet_advice(diet_score, enough_info, calorie_difference, meal_times):
+def generate_diet_advice(diet_score, calorie_difference, meal_times):
     actions = {
-        "no enough data": "Start tracking your meals to get insights into your eating patterns.",
 
         "calorie surplus, diet score less than 2": "Swap sugary drinks for water infused with lemon or cucumber for hydration without extra calories.",
         "calorie surplus, diet score between 2 and 4": "Include berries, such as strawberries or blueberries, and leafy greens like spinach in your meals for nutrients without too many calories.",
@@ -24,8 +23,6 @@ def generate_diet_advice(diet_score, enough_info, calorie_difference, meal_times
 
     advice = []
 
-    if not enough_info:
-        advice.append(actions["no enough data"])
 
     if calorie_difference > 2800000:  # Assuming a surplus of more than 500 calories is significant
         if diet_score <= 2:
@@ -61,19 +58,26 @@ def generate_diet_advice(diet_score, enough_info, calorie_difference, meal_times
         elif diet_score <= 10:
             advice.append(actions["diet balance, diet score between 8 and 10"])
 
-    if not is_time_in_range(meal_times['breakfast'], '07:00', '09:00'):
-        advice.append("Consider having breakfast between 7:00 AM and 9:00 AM to kickstart your metabolism.")
-    if not is_time_in_range(meal_times['lunch'], '12:00', '14:00'):
-        advice.append("Aim to have lunch between 12:00 PM and 2:00 PM to maintain energy levels throughout the day.")
-    if not is_time_in_range(meal_times['dinner'], '18:00', '20:00'):
-        advice.append("Eating dinner between 6:00 PM and 8:00 PM can help with digestion and sleep quality.")
+    breakfast_range = ('07:00', '09:00')
+    lunch_range = ('12:00', '14:00')
+    dinner_range = ('18:00', '20:00')
+
+    for meal_time in meal_times:
+        if not is_time_in_range(meal_time, *breakfast_range) and not is_time_in_range(meal_time, *lunch_range) and not is_time_in_range(meal_time, *dinner_range):
+            advice.append(f"Your meal timings are irregular. Try to adjust your meal time closer to recommended periods (Breakfast: {breakfast_range[0]}-{breakfast_range[1]}, Lunch: {lunch_range[0]}-{lunch_range[1]}, Dinner: {dinner_range[0]}-{dinner_range[1]}).")
 
     advice_string = ", ".join(advice)
     return advice_string
 
+
 def is_time_in_range(meal_time, start, end):
-    """check if meal time is in range"""
-    meal_hour = int(meal_time.split(':')[0])
-    start_hour = int(start.split(':')[0])
-    end_hour = int(end.split(':')[0])
-    return start_hour <= meal_hour <= end_hour
+    """Check if meal time is in range."""
+    meal_hour, meal_minute = map(int, meal_time.split(':'))
+    start_hour, start_minute = map(int, start.split(':'))
+    end_hour, end_minute = map(int, end.split(':'))
+
+    meal_time_minutes = meal_hour * 60 + meal_minute
+    start_minutes = start_hour * 60 + start_minute
+    end_minutes = end_hour * 60 + end_minute
+
+    return start_minutes <= meal_time_minutes <= end_minutes
