@@ -63,7 +63,7 @@ class MealStructure:
 
     def meal_dict(self):
         db_dict = {
-            "caloriesPerHundredGrams": self._calories,
+            "totalCalories": self._calories,
             "date": self._date,
             "foodAmount": self._food_amount,
             "foodName": self._food_name,

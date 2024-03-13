@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 import data
-from firebase_processor_test_file import FirebaseService
+from firebase_processor import FirebaseService
 
 app = FastAPI()
 
@@ -10,20 +10,31 @@ app = FastAPI()
 
 @app.post("/healthData/synchronize")
 async def synchronize_health_data(healthData: data.HealthData):
-    print(healthData)
+    # print(healthData)
     # healthData_json = healthData.model_dump_json()
     # with open("healthData_raw.txt", "w") as file:
     #     file.write(healthData_json)
+    try:
+        firebase_processor = FirebaseService("serviceAccountKey.json")
+        user_id = healthData.userId
+        print(user_id)
+        sleep_records = healthData.sleepRecords
+        exercise_records = healthData.exerciseRecord
+        diet_records = healthData.dietRecords
+        heart_rate_records = healthData.heartRateRecords
 
-    firebase_processor = FirebaseService("serviceAccountKey.json")
-    user_id = healthData.userId
-    print(user_id)
-    sleep_records = healthData.sleepRecords
-    exercise_records = healthData.exerciseRecord
-    diet_records = healthData.dietRecords
-    heart_rate_records = healthData.heartRateRecords
+        process_sleep_records(user_id, firebase_processor, sleep_records)
+        process_exercise_records(user_id, firebase_processor, exercise_records)
+        process_diet_records(user_id, firebase_processor, diet_records)
+        process_heart_rate_records(user_id, firebase_processor, heart_rate_records)
+        return {"message": "success"}
+    except Exception as e:
+        print(f"ERROR: {e}")
+        return {"message": "fail"}
 
-    for record in sleep_records:
+
+def process_sleep_records(user_id, firebase_processor, records):
+    for record in records:
         date = record["date"]
         duration = record['duration']
         end_time = record['endTime']
@@ -33,7 +44,9 @@ async def synchronize_health_data(healthData: data.HealthData):
                                               start_time=start_time)
         firebase_processor.save_data(user_id, "sleep", sleep_structure.sleep_dict())
 
-    for record in exercise_records:
+
+def process_exercise_records(user_id, firebase_processor, records):
+    for record in records:
         etype = record['activityType']
         calories = record['caloriesBurned']
         date = record['date']
@@ -42,7 +55,9 @@ async def synchronize_health_data(healthData: data.HealthData):
                                                     calories=calories)
         firebase_processor.save_data(user_id, "activity", activity_structure.activity_dict())
 
-    for record in diet_records:
+
+def process_diet_records(user_id, firebase_processor, records):
+    for record in records:
         calories = record['caloriesPerHundredGrams']
         date = record['date']
         amount = record['foodAmount']
@@ -53,7 +68,8 @@ async def synchronize_health_data(healthData: data.HealthData):
                                             meal_type=ftype, time=time)
         firebase_processor.save_data(user_id, "meals", diet_structure.meal_dict())
 
-    for record in heart_rate_records:
+def process_heart_rate_records(user_id, firebase_processor, records):
+    for record in records:
         avg_heart_rate = record["averageHeartRate"]
         end_time = record['endTime']
         max_heart_rate = record['maximumHeartRate']
@@ -63,5 +79,3 @@ async def synchronize_health_data(healthData: data.HealthData):
                                                        maximum_heart_rate=max_heart_rate,
                                                        minimum_heart_rate=min_heart_rate, start_time=start_time)
         firebase_processor.save_data(user_id, "heartRate", heart_rate_structure.heart_rate_dict())
-
-    return {"message": "success"}

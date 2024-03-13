@@ -108,7 +108,7 @@ fun MenuScrollContent(navController: NavHostController, userId: String, context:
         Button(
             onClick = {
                 coroutineScope.launch {
-                    dashboardViewModel.synchronizeHealthData()
+                    dashboardViewModel.synchronizeHealthData(context)
                 }
             },
             modifier = buttonModifier

@@ -21,16 +21,16 @@ class DietInformationViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val documents = db.collection("users").document(userId).collection("meals")
-                    .orderBy("date", Query.Direction.DESCENDING) // 按日期降序排序
-                    .limit(5) // 限制结果到最近的五条记录
+                    .orderBy("date", Query.Direction.DESCENDING) // sorted by date
+                    .limit(5) // limited to 5
                     .get()
-                    .await() // 使用 await 而不是 addOnSuccessListener
+                    .await()
                 val dietInfos = documents.map { document ->
                     DietInfo(
                         mealType = document.getString("mealType") ?: "",
                         foodName = document.getString("foodName") ?: "",
                         totalFat = document.getString("totalFat") ?: "",
-                        caloriesPerHundredGrams = document.getString("caloriesPerHundredGrams") ?: "",
+                        totalCalories = document.getString("totalCalories") ?: "",
                         foodAmount = document.getString("foodAmount") ?: "",
                         date = document.getString("date") ?: "",
                         time = document.getString("time") ?: ""
