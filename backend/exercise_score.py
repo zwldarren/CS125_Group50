@@ -58,7 +58,7 @@ def calculate_score(tdee, calorie_intake, calorie_burn):
     else:
         score = 0  # 健康范围内
 
-    return score
+    return score, calorie_difference
 
 
 if __name__ == '__main__':

@@ -1,5 +1,5 @@
 #enough_info 是Boolean, 其他都是int, 这些都是提取用户过去五天，然后得出, duration为hour，start_time_variance也为hour
-def generate_diet_advice(diet_score, enough_info, weekly_calorie_intake, weekly_calorie_burn, meal_times):
+def generate_diet_advice(diet_score, enough_info, calorie_difference, meal_times):
     actions = {
         "no enough data": "Start tracking your meals to get insights into your eating patterns.",
 
@@ -23,7 +23,6 @@ def generate_diet_advice(diet_score, enough_info, weekly_calorie_intake, weekly_
     }
 
     advice = []
-    calorie_difference = weekly_calorie_intake - weekly_calorie_burn
 
     if not enough_info:
         advice.append(actions["no enough data"])
