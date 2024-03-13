@@ -1,9 +1,13 @@
 from fastapi import FastAPI
 import data
 from firebase_processor import FirebaseService
+import joblib
+
+from sleep_score import calculate_sleep_score
 
 app = FastAPI()
 
+sleep_model = joblib.load("train/model.joblib")
 
 # Run the server with the following command
 # uvicorn main:app --reload
@@ -40,9 +44,13 @@ def process_sleep_records(user_id, firebase_processor, records):
         end_time = record['endTime']
         stage = record['stages']
         start_time = record['startTime']
+        
         sleep_structure = data.SleepStructure(date=date, duration=duration, end_time=end_time, stages=stage,
-                                              start_time=start_time)
-        firebase_processor.save_data(user_id, "sleep", sleep_structure.sleep_dict())
+                                              start_time=start_time, sleep_model=sleep_model)
+        sleep_structure_dict = sleep_structure.sleep_dict()
+        sleep_score = calculate_sleep_score(sleep_structure_dict, sleep_model)
+        sleep_structure_dict["sleepScore"] = sleep_score
+        firebase_processor.save_data(user_id, "sleep", sleep_structure_dict)
 
 
 def process_exercise_records(user_id, firebase_processor, records):
