@@ -2,7 +2,6 @@ from typing import List
 from pydantic import BaseModel
 from datetime import datetime
 
-from sleep_score import calculate_sleep_score
 
 class HealthData(BaseModel):
     userId: str
@@ -13,16 +12,15 @@ class HealthData(BaseModel):
 
 
 class SleepStructure:
-    def __init__(self, date=None, duration=None, start_time=None, end_time=None, stages=None, sleep_model = None):
+    def __init__(self, date=None, duration=None, start_time=None, end_time=None, stages=None):
         self._date = date
         self._duration = duration
         self._start_time = start_time
         self._end_time = end_time
         self._stages = stages
         self._stage_percentages = self._preprocess_stage(stages)
-        
 
-    def _preprocess_stage(self, sleep_data) -> dict | None:
+    def _preprocess_stage(self, sleep_data):
         if not sleep_data:
             return None
         for entry in sleep_data:
