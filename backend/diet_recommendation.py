@@ -27,7 +27,7 @@ def generate_diet_advice(diet_score, enough_info, calorie_difference, meal_times
     if not enough_info:
         advice.append(actions["no enough data"])
 
-    if calorie_difference > 2800:  # Assuming a surplus of more than 500 calories is significant
+    if calorie_difference > 2800000:  # Assuming a surplus of more than 500 calories is significant
         if diet_score <= 2:
             advice.append(actions["calorie surplus, diet score less than 2"])
         elif diet_score <= 4:
@@ -38,7 +38,7 @@ def generate_diet_advice(diet_score, enough_info, calorie_difference, meal_times
             advice.append(actions["calorie surplus, diet score between 6 and 8"])
         elif diet_score <= 10:
             advice.append(actions["calorie surplus, diet score between 8 and 10"])
-    elif calorie_difference < -2800:  # Assuming a deficit of more than 500 calories
+    elif calorie_difference < -2800000:  # Assuming a deficit of more than 500 calories
         if diet_score <= 2:
             advice.append(actions["calorie deficit, diet score less than 2"])
         elif diet_score <= 4:

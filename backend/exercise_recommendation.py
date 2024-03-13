@@ -31,7 +31,7 @@ def generate_exercise_advice(exercise_score, enough_info, weekly_exercise_sessio
     if not enough_info:
         advice.append(actions["no enough data"])
 
-    if calorie_difference >= 2800:
+    if calorie_difference >= 2800000:
         if exercise_score <= 2:
             advice.append(actions["calorie surplus, exercise score less than 2"])
         elif exercise_score <= 4:
@@ -42,7 +42,7 @@ def generate_exercise_advice(exercise_score, enough_info, weekly_exercise_sessio
             advice.append(actions["calorie surplus, exercise score between 6 and 8"])
         elif exercise_score <= 10:
             advice.append(actions["calorie surplus, exercise score between 8 and 10"])
-    elif calorie_difference <= -2800:
+    elif calorie_difference <= -2800000:
         if exercise_score <= 2:
             advice.append(actions["calorie deficit, exercise score less than 2"])
         elif exercise_score <= 4:
