@@ -8,6 +8,9 @@ class FirebaseService:
         self.service_account_path = service_account_path
         self.db = self.init_firebase()
 
+    def get_db(self):
+        return self.db
+
     def init_firebase(self):
         """
         初始化Firebase应用并获取Firestore数据库的引用。
@@ -75,7 +78,7 @@ class FirebaseService:
         query_conditions_template = {
             'sleep': [('date', '=='), ('startTime', '==')],
             'meals': [('date', '=='), ('time', '==')],
-            'activity': [('activityType', '=='), ('date', '=='), ('startTime', '=='), ('calories', '==')],
+            'activity': [('activityType', '=='), ('date', '=='), ('startTime', '=='), ('caloriesBurned', '==')],
             'heartRate': []  # 新集合不应用任何查询条件
         }
 
@@ -108,3 +111,4 @@ class FirebaseService:
         else:
             print("Data already exists")
             return 0
+

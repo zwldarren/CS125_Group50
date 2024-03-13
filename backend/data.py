@@ -90,7 +90,7 @@ class ActivityStructure:
             "duration": self._duration,
             "endTime": self._end_time,
             "startTime": self._start_time,
-            "calories": self._calories
+            "caloriesBurned": self._calories
         }
         return db_dict
 

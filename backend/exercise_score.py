@@ -5,6 +5,7 @@ def calculate_bmr(weight, height, age, gender):
         bmr = 10 * weight + 6.25 * height - 5 * age - 161
     return bmr
 
+
 def calculate_tdee(bmr, average_calories_burned_per_week):
     # 考虑到运动手表的会记录包括轻微活动如步行，因此主要判断条件是日平均消耗卡路里
     daily_average_calories_burned = average_calories_burned_per_week / 7
@@ -18,7 +19,7 @@ def calculate_tdee(bmr, average_calories_burned_per_week):
         activity_level = 'active'
     else:
         activity_level = 'very_active'
-    
+
     activity_factors = {
         'sedentary': 1.2,
         'light': 1.375,
@@ -26,13 +27,14 @@ def calculate_tdee(bmr, average_calories_burned_per_week):
         'active': 1.725,
         'very_active': 1.9,
     }
-    
+
     return bmr * activity_factors[activity_level]
+
 
 def calculate_score(tdee, calorie_intake, calorie_burn):
     calorie_difference = calorie_intake - (tdee - calorie_burn)
     abs_diff = abs(calorie_difference)
-    
+
     if abs_diff > 2000:
         score = 10
     elif abs_diff > 1800:
@@ -58,23 +60,25 @@ def calculate_score(tdee, calorie_intake, calorie_burn):
 
     return score
 
-# 示例用户数据
-weight = 70  # kg
-height = 175  # cm
-age = 30
-gender = 'male'
 
-# exercise_days_per_week = 7  # 用户每周运动天数，假设每天都有活动
-# 冗余参数
+if __name__ == '__main__':
+    # 示例用户数据
+    weight = 70  # kg
+    height = 175  # cm
+    age = 30
+    gender = 'male'
 
-average_calories_burned_per_week = 1400  # 用户每周平均运动消耗的卡路里
-# 实际应用中是读取过去7天的所有运动，然后计算这些运动的消耗卡路里总和
+    # exercise_days_per_week = 7  # 用户每周运动天数，假设每天都有活动
+    # 冗余参数
 
-calorie_intake = 2500  # 用户每日摄入卡路里
-calorie_burn = 200  # 用户每日通过运动消耗的卡路里
+    average_calories_burned_per_week = 1400  # 用户每周平均运动消耗的卡路里
+    # 实际应用中是读取过去7天的所有运动，然后计算这些运动的消耗卡路里总和
 
-bmr = calculate_bmr(weight, height, age, gender)
-tdee = calculate_tdee(bmr, average_calories_burned_per_week)
-score = calculate_score(tdee, calorie_intake, calorie_burn)
+    calorie_intake = 2500  # 用户每日摄入卡路里
+    calorie_burn = 200  # 用户每日通过运动消耗的卡路里
 
-print(f"BMR: {bmr:.2f}, TDEE: {tdee:.2f}, Score: {score:.2f}")
+    bmr = calculate_bmr(weight, height, age, gender)
+    tdee = calculate_tdee(bmr, average_calories_burned_per_week)
+    score = calculate_score(tdee, calorie_intake, calorie_burn)
+
+    print(f"BMR: {bmr:.2f}, TDEE: {tdee:.2f}, Score: {score:.2f}")
