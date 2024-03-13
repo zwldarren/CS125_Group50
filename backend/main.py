@@ -10,6 +10,9 @@ from firebase_processor import FirebaseService
 from exercise_score import *
 from exercise_score import get_exercise_score
 
+from overall_recommendation import calculate_overall_health_score
+from overall_recommendation import provide_final_recommendation
+
 from sleep_score import calculate_sleep_score
 
 app = FastAPI()
@@ -115,7 +118,6 @@ async def update_recommendation(user_id):
 
         # get recommendation, 假demo
         overall_recommendation, exercise_recommendation, sleep_recommendation, diet_recommendation = activity_processor.generate_overall_recommendation()
-        overall_score, exercise_score, sleep_score, diet_score = activity_processor.calculate_scores()
 
         latest_meal_date = meals_processor.get_latest_meal_time()
         date_info = meals_processor.get_certain_date_info(latest_meal_date)
@@ -126,6 +128,8 @@ async def update_recommendation(user_id):
         weight = float(user_info['weight'])
         height = float(user_info['height'])
         age = int(user_info['age'])
+        goal = user_info['goal']
+
         day_activity = activity_processor.get_latest_meal_time()
         activity_info = activity_processor.get_activities_last_7_days(day_activity)
         average_calories_burned_per_week = sum(
@@ -146,6 +150,9 @@ async def update_recommendation(user_id):
         sleep_score = sum(item['sleepScore'] for item in sleep_infos) / len(sleep_infos)
 
         exercise_score, calorie_difference = get_exercise_score(weight, height, age, gender, average_calories_burned_per_week, calorie_intake, calorie_burn)
+
+        overall_score = calculate_overall_health_score(sleep_day, diet_score, exercise_score, goal)
+        overall_recommendation = provide_final_recommendation(overall_score, goal)
 
         return {
             "overall_recommendation": overall_recommendation,

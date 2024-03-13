@@ -1,11 +1,11 @@
 def calculate_overall_health_score(sleep_score, diet_score, exercise_score, user_goal):
-    weights = {'sleep': 0.25, 'diet': 0.25, 'exercise': 0.25}
+    weights = {'Sleep': 0.25, 'Diet': 0.25, 'Exercise': 0.25}
 
     weights[user_goal] = 0.5
 
-    overall_score = (sleep_score * weights['sleep'] +
-                     diet_score * weights['diet'] +
-                     exercise_score * weights['exercise'])
+    overall_score = (sleep_score * weights['Sleep'] +
+                     diet_score * weights['Diet'] +
+                     exercise_score * weights['Exercise'])
     return overall_score
 
 

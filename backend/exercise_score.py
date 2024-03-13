@@ -5,6 +5,7 @@ def calculate_bmr(weight, height, age, gender):
         bmr = (10 * weight + 6.25 * height - 5 * age - 161) * 1000
     return bmr
 
+
 def calculate_tdee(bmr, average_calories_burned_per_week):
     # 考虑到运动手表的会记录包括轻微活动如步行，因此主要判断条件是日平均消耗卡路里
     daily_average_calories_burned = average_calories_burned_per_week / 7
@@ -18,7 +19,7 @@ def calculate_tdee(bmr, average_calories_burned_per_week):
         activity_level = 'active'
     else:
         activity_level = 'very_active'
-    
+
     activity_factors = {
         'sedentary': 1.2,
         'light': 1.375,
@@ -26,15 +27,15 @@ def calculate_tdee(bmr, average_calories_burned_per_week):
         'active': 1.725,
         'very_active': 1.9,
     }
-    print(activity_level)
-    
+
     return bmr * activity_factors[activity_level]
 
+
 def calculate_score(tdee, calorie_intake, calorie_burn):
-    print(calorie_intake/1000,tdee/1000,calorie_burn/1000)
+    print(calorie_intake / 1000, tdee / 1000, calorie_burn / 1000)
     calorie_difference = calorie_intake - (tdee - calorie_burn)
     abs_diff = abs(calorie_difference)
-    
+
     if abs_diff > 1000000:
         score = 0
     elif abs_diff > 900000:
@@ -61,14 +62,12 @@ def calculate_score(tdee, calorie_intake, calorie_burn):
     return score, calorie_difference
 
 
-
-
-def get_exercise_score(weight, height, age, gender, average_calories_burned_per_week,calorie_intake, calorie_burn):
+def get_exercise_score(weight, height, age, gender, average_calories_burned_per_week, calorie_intake, calorie_burn):
     # 计算得分的总函数
     bmr = calculate_bmr(weight, height, age, gender)
     tdee = calculate_tdee(bmr, average_calories_burned_per_week)
     fin_score, fin_calorie_difference = calculate_score(tdee, calorie_intake, calorie_burn)
-    return fin_score,fin_calorie_difference
+    return fin_score, fin_calorie_difference
 
 
 if __name__ == "__main__":
@@ -86,8 +85,9 @@ if __name__ == "__main__":
     # score, calorie_difference = calculate_score(tdee, calorie_intake, calorie_burn)
 
     # call这个计算得分和总函数
-    fin_score,fin_calorie_difference = get_exercise_score(weight, height, age, gender, average_calories_burned_per_week,calorie_intake, calorie_burn)
-
+    fin_score, fin_calorie_difference = get_exercise_score(weight, height, age, gender,
+                                                           average_calories_burned_per_week, calorie_intake,
+                                                           calorie_burn)
 
     print(
         f"in cal: BMR: {bmr:.2f}, TDEE: {tdee:.2f}, Score: {fin_score:.2f}, Calorie difference: {fin_calorie_difference:.2f}")
