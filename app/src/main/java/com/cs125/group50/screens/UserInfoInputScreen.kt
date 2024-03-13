@@ -19,11 +19,14 @@ import androidx.compose.foundation.text.KeyboardOptions
 fun UserInfoInputScreen(navController: NavHostController, userId: String) {
     val viewModel: UserInfoInputViewModel = viewModel()
     var gender by remember { mutableStateOf("") }
+    var goal by remember { mutableStateOf("") }
     var height by remember { mutableStateOf("") }
     var weight by remember { mutableStateOf("") }
     var age by remember { mutableStateOf("") }
-    var expanded by remember { mutableStateOf(false) }
+    var expandedGender by remember { mutableStateOf(false) }
+    var expandedGoal by remember { mutableStateOf(false) }
     val genderOptions = listOf("Male", "Female")
+    val goalOptions = listOf("Sleep", "Exercise", "Diet")
 
     Column(
         modifier = Modifier
@@ -39,13 +42,13 @@ fun UserInfoInputScreen(navController: NavHostController, userId: String) {
                 label = { Text("Gender") },
                 readOnly = true,
                 trailingIcon = {
-                    Icon(Icons.Default.ArrowDropDown, "dropdown", Modifier.clickable { expanded = !expanded })
+                    Icon(Icons.Default.ArrowDropDown, "dropdown", Modifier.clickable { expandedGender = !expandedGender })
                 },
                 modifier = Modifier.fillMaxWidth()
             )
             DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
+                expanded = expandedGender,
+                onDismissRequest = { expandedGender = false },
                 modifier = Modifier.fillMaxWidth() // 确保 DropdownMenu 和 TextField 宽度一致
             ) {
                 genderOptions.forEach { label ->
@@ -53,7 +56,7 @@ fun UserInfoInputScreen(navController: NavHostController, userId: String) {
                         text = { Text(label) },
                         onClick = {
                             gender = label
-                            expanded = false
+                            expandedGender = false
                         }
                     )
                 }
@@ -90,6 +93,36 @@ fun UserInfoInputScreen(navController: NavHostController, userId: String) {
             modifier = Modifier.fillMaxWidth()
         )
 
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Box {
+            OutlinedTextField(
+                value = goal,
+                onValueChange = { /* ReadOnly */ },
+                label = { Text("Goal") },
+                readOnly = true,
+                trailingIcon = {
+                    Icon(Icons.Default.ArrowDropDown, "dropdown", Modifier.clickable { expandedGoal = !expandedGoal })
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+            DropdownMenu(
+                expanded = expandedGoal,
+                onDismissRequest = { expandedGoal = false },
+                modifier = Modifier.fillMaxWidth() // 确保 DropdownMenu 和 TextField 宽度一致
+            ) {
+                goalOptions.forEach { label ->
+                    DropdownMenuItem(
+                        text = { Text(label) },
+                        onClick = {
+                            goal = label
+                            expandedGoal = false
+                        }
+                    )
+                }
+            }
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
@@ -99,8 +132,8 @@ fun UserInfoInputScreen(navController: NavHostController, userId: String) {
                 val ageInt = age.toIntOrNull()
 
                 // 检查所有字段是否都有信息
-                if (gender.isNotEmpty() && heightInt != null && weightInt != null && ageInt != null) {
-                    viewModel.saveUserInfo(userId, gender, heightInt, weightInt, ageInt)
+                if (goal.isNotEmpty() && gender.isNotEmpty() && heightInt != null && weightInt != null && ageInt != null) {
+                    viewModel.saveUserInfo(userId, gender, heightInt, weightInt, ageInt, goal)
                     navController.popBackStack()
                 }
             },
