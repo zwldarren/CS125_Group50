@@ -125,6 +125,12 @@ def calculate_score(tdee, calorie_intake, calorie_burn):
 
     return score, calorie_difference
 
+def get_diet_score(weight, height, age, gender, average_calories_burned_per_week,calorie_intake, calorie_burn):
+    # 计算得分的总函数
+    bmr = calculate_bmr(weight, height, age, gender)
+    tdee = calculate_tdee(bmr, average_calories_burned_per_week)
+    fin_score, fin_calorie_difference = calculate_score(tdee, calorie_intake, calorie_burn)
+    return fin_score,fin_calorie_difference
 
 
 if __name__ == "__main__":
@@ -139,11 +145,15 @@ if __name__ == "__main__":
 
     bmr = calculate_bmr(weight, height, age, gender)
     tdee = calculate_tdee(bmr, average_calories_burned_per_week)
-    score, calorie_difference = calculate_score(tdee, calorie_intake, calorie_burn)
+    # score, calorie_difference = calculate_score(tdee, calorie_intake, calorie_burn)
+
+    # call这个计算得分和总函数
+    fin_score,fin_calorie_difference = get_diet_score(weight, height, age, gender, average_calories_burned_per_week,calorie_intake, calorie_burn)
+
 
     print(
-        f"in cal: BMR: {bmr:.2f}, TDEE: {tdee:.2f}, Score: {score:.2f}, Calorie difference: {calorie_difference:.2f}")
+        f"in cal: BMR: {bmr:.2f}, TDEE: {tdee:.2f}, Score: {fin_score:.2f}, Calorie difference: {fin_calorie_difference:.2f}")
     print(
-        f"in kcal: BMR: {bmr / 1000:.2f}, TDEE: {tdee / 1000:.2f}, Score: {score:.2f}, Calorie difference: {calorie_difference / 1000:.2f}")
-    print(f"Exercise Score: {score:.2f}")
+        f"in kcal: BMR: {bmr / 1000:.2f}, TDEE: {tdee / 1000:.2f}, Score: {fin_score:.2f}, Calorie difference: {fin_calorie_difference / 1000:.2f}")
+    print(f"Exercise Score: {fin_score:.2f}")
 
