@@ -1,5 +1,5 @@
 #enough_info 是Boolean, 其他都是int, 这些都是提取用户过去五天，然后得出, duration为hour，start_time_variance也为hour
-def generate_diet_advice(diet_score, enough_info, weekly_calorie_intake, weekly_calorie_burn, meal_times):
+def generate_diet_advice(diet_score, enough_info, calorie_difference, meal_times):
     actions = {
         "no enough data": "Start tracking your meals to get insights into your eating patterns.",
 
@@ -23,12 +23,11 @@ def generate_diet_advice(diet_score, enough_info, weekly_calorie_intake, weekly_
     }
 
     advice = []
-    calorie_difference = weekly_calorie_intake - weekly_calorie_burn
 
     if not enough_info:
         advice.append(actions["no enough data"])
 
-    if calorie_difference > 2800:  # Assuming a surplus of more than 500 calories is significant
+    if calorie_difference > 2800000:  # Assuming a surplus of more than 500 calories is significant
         if diet_score <= 2:
             advice.append(actions["calorie surplus, diet score less than 2"])
         elif diet_score <= 4:
@@ -39,7 +38,7 @@ def generate_diet_advice(diet_score, enough_info, weekly_calorie_intake, weekly_
             advice.append(actions["calorie surplus, diet score between 6 and 8"])
         elif diet_score <= 10:
             advice.append(actions["calorie surplus, diet score between 8 and 10"])
-    elif calorie_difference < -2800:  # Assuming a deficit of more than 500 calories
+    elif calorie_difference < -2800000:  # Assuming a deficit of more than 500 calories
         if diet_score <= 2:
             advice.append(actions["calorie deficit, diet score less than 2"])
         elif diet_score <= 4:

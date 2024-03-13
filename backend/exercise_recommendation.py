@@ -1,4 +1,4 @@
-def generate_exercise_advice(exercise_score, enough_info, weekly_exercise_sessions, weekly_calorie_intake, weekly_calorie_burn):
+def generate_exercise_advice(exercise_score, enough_info, weekly_exercise_sessions, calorie_difference):
     actions = {
         "no enough data": "Less than 7 days of exercise user information recorded. To gain better insight into your exercise patterns, consider using a fitness tracking device or manually logging your activities.",
         "low frequency, exercise score less than 2": "Focus on building a consistent exercise routine with light activities such as daily walks or gentle yoga. Aim for 15-20 minutes per session, 3 times a week to gradually increase your fitness level.",
@@ -27,13 +27,11 @@ def generate_exercise_advice(exercise_score, enough_info, weekly_exercise_sessio
 
     }
 
-    calorie_difference = weekly_calorie_intake - weekly_calorie_burn
-
     advice = []
     if not enough_info:
         advice.append(actions["no enough data"])
 
-    if calorie_difference >= 2800:
+    if calorie_difference >= 2800000:
         if exercise_score <= 2:
             advice.append(actions["calorie surplus, exercise score less than 2"])
         elif exercise_score <= 4:
@@ -44,7 +42,7 @@ def generate_exercise_advice(exercise_score, enough_info, weekly_exercise_sessio
             advice.append(actions["calorie surplus, exercise score between 6 and 8"])
         elif exercise_score <= 10:
             advice.append(actions["calorie surplus, exercise score between 8 and 10"])
-    elif calorie_difference <= -2800:
+    elif calorie_difference <= -2800000:
         if exercise_score <= 2:
             advice.append(actions["calorie deficit, exercise score less than 2"])
         elif exercise_score <= 4:

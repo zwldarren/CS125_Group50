@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Path
 import data
 from firebase_processor import FirebaseService
 import joblib
@@ -36,6 +36,15 @@ async def synchronize_health_data(healthData: data.HealthData):
         print(f"ERROR: {e}")
         return {"message": "fail"}
 
+
+@app.get("/update/recommendation/{user_id}")
+async def update_recommendation(user_id):
+    return {
+        "overallResponse": "Recommendation updated successfully",
+        "exerciseResponse": "Recommendation updated successfully",
+        "sleepResponse": "Recommendation updated successfully",
+        "dietResponse": "Recommendation updated successfully",
+    }
 
 def process_sleep_records(user_id, firebase_processor, records):
     for record in records:

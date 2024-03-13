@@ -41,22 +41,22 @@ def calculate_meal_count_score(meal_times):
 # 卡路里消耗/摄入得分
 def calculate_bmr(weight, height, age, gender):
     if gender == 'male':
-        bmr = 10 * weight + 6.25 * height - 5 * age + 5
+        bmr = (10 * weight + 6.25 * height - 5 * age + 5) * 1000
     else:  # female
-        bmr = 10 * weight + 6.25 * height - 5 * age - 161
+        bmr = (10 * weight + 6.25 * height - 5 * age - 161) *1000
     return bmr
 
 
 def calculate_tdee(bmr, average_calories_burned_per_week):
     # 考虑到运动手表的会记录包括轻微活动如步行，因此主要判断条件是日平均消耗卡路里
     daily_average_calories_burned = average_calories_burned_per_week / 7
-    if daily_average_calories_burned < 200:
+    if daily_average_calories_burned < 2000000:
         activity_level = 'sedentary'
-    elif 200 <= daily_average_calories_burned < 400:
+    elif 2000000 <= daily_average_calories_burned < 4000000:
         activity_level = 'light'
-    elif 400 <= daily_average_calories_burned < 600:
+    elif 4000000 <= daily_average_calories_burned < 6000000:
         activity_level = 'moderate'
-    elif 600 <= daily_average_calories_burned < 800:
+    elif 6000000 <= daily_average_calories_burned < 8000000:
         activity_level = 'active'
     else:
         activity_level = 'very_active'
@@ -76,28 +76,28 @@ def calculate_score(tdee, calorie_intake, calorie_burn):
     calorie_difference = calorie_intake - (tdee - calorie_burn)
     abs_diff = abs(calorie_difference)
 
-    if abs_diff > 2000:
-        score = 10
-    elif abs_diff > 1800:
-        score = 9
-    elif abs_diff > 1600:
-        score = 8
-    elif abs_diff > 1400:
-        score = 7
-    elif abs_diff > 1200:
-        score = 6
-    elif abs_diff > 1000:
-        score = 5
-    elif abs_diff > 800:
-        score = 4
-    elif abs_diff > 600:
-        score = 3
-    elif abs_diff > 400:
-        score = 2
-    elif abs_diff > 200:
+    if abs_diff > 1000000:
+        score = 0
+    elif abs_diff > 900000:
         score = 1
+    elif abs_diff > 800000:
+        score = 2
+    elif abs_diff > 700000:
+        score = 3
+    elif abs_diff > 600000:
+        score = 4
+    elif abs_diff > 500000:
+        score = 5
+    elif abs_diff > 400000:
+        score = 6
+    elif abs_diff > 300000:
+        score = 7
+    elif abs_diff > 200000:
+        score = 8
+    elif abs_diff > 100000:
+        score = 9
     else:
-        score = 0  # 健康范围内
+        score = 10  # 健康范围内
 
     return score
 
@@ -122,22 +122,21 @@ def get_diet_score(meal_times, weight, height, age, gender, average_calories_bur
     return total_diet_score
 
 
-# 示例用户
-weight = 70  # kg
-height = 175  # cm
-age = 30
-gender = 'male'
+if __name__ == "__main__":
+    # 示例用户数据
+    weight = 70  # kg
+    height = 175  # cm
+    age = 30
+    gender = 'male'
 
-average_calories_burned_per_week = 1400  # 用户每周平均运动消耗的卡路里
+    average_calories_burned_per_week = 1400000  # 用户上周运动消耗的总卡路里
+    calorie_intake = 2500000  # 用户每日摄入卡路里
+    calorie_burn = 200000  # 用户每日通过运动消耗的卡路里
 
-calorie_intake = 2500  # 用户每日摄入卡路里
-calorie_burn = 200  # 用户每日通过运动消耗的卡路里
+    meal_times = ['08:00', '13:00', '20:00', '20:30', '18:30']
 
-meal_times = ['08:00', '13:00', '20:00', '20:30', '18:30']
+    fin_score = get_diet_score(meal_times, weight, height, age, gender,
+                               average_calories_burned_per_week, calorie_intake, calorie_burn)
 
-fin_score = get_diet_score(meal_times, weight, height, age, gender,
-                           average_calories_burned_per_week, calorie_intake, calorie_burn)
-
-print(f"Diet Score: {fin_score:.2f}")
-
+    print(f"Diet Score: {fin_score:.2f}")
 
