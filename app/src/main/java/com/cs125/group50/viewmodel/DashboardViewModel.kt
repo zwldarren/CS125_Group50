@@ -207,7 +207,7 @@ class DashboardViewModel(context: Context) : ViewModel() {
         }
     }
 
-    private val db = Firebase.firestore
+//    private val db = Firebase.firestore
 //    fun saveActivityInfo(userId: String, activityInfo: ActivityInfo) {
 //        val activityMap = hashMapOf(
 //            "activityType" to activityInfo.activityType,
