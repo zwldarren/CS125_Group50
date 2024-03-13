@@ -125,7 +125,7 @@ def calculate_score(tdee, calorie_intake, calorie_burn):
 
     return score, calorie_difference
 
-def get_diet_score(weight, height, age, gender, average_calories_burned_per_week,calorie_intake, calorie_burn):
+def get_exercise_score(weight, height, age, gender, average_calories_burned_per_week,calorie_intake, calorie_burn):
     # 计算得分的总函数
     bmr = calculate_bmr(weight, height, age, gender)
     tdee = calculate_tdee(bmr, average_calories_burned_per_week)
@@ -148,7 +148,7 @@ if __name__ == "__main__":
     # score, calorie_difference = calculate_score(tdee, calorie_intake, calorie_burn)
 
     # call这个计算得分和总函数
-    fin_score,fin_calorie_difference = get_diet_score(weight, height, age, gender, average_calories_burned_per_week,calorie_intake, calorie_burn)
+    fin_score,fin_calorie_difference = get_exercise_score(weight, height, age, gender, average_calories_burned_per_week,calorie_intake, calorie_burn)
 
 
     print(
