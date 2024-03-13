@@ -5,7 +5,6 @@ import android.os.RemoteException
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
@@ -25,7 +24,6 @@ import com.cs125.group50.data.SleepInfo
 import com.cs125.group50.data.SleepStage
 import com.cs125.group50.data.UserInfo
 import com.cs125.group50.utils.ApiService
-import com.firebase.ui.auth.AuthUI.getApplicationContext
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.functions.ktx.functions
@@ -312,6 +310,30 @@ class DashboardViewModel(context: Context) : ViewModel() {
             .addOnFailureListener { e ->
                 Log.w("DashboardViewModel", "Error adding HeartRateInfo", e)
             }
+    }
+
+    fun updateRecommendation() {
+        viewModelScope.launch {
+            try {
+                val response = ApiService.getHealthDataService().getRecommendation(userId)
+                if (response.isSuccessful && response.body() != null) {
+                    val recommendation = response.body()!!
+                    val advice = buildString {
+                        append("Overall: ${recommendation.overallResponse}\n")
+                        append("Exercise: ${recommendation.exerciseResponse}\n")
+                        append("Diet: ${recommendation.dietResponse}\n")
+                        append("Sleep: ${recommendation.sleepResponse}")
+                    }
+                    _healthAdvice.value = advice
+                } else {
+                    Log.e("DashboardViewModel", "Failed to fetch recommendation: ${response.errorBody()?.string()}")
+                    errorMessage.value = "Error fetching recommendation."
+                }
+            } catch (e: Exception) {
+                Log.e("DashboardViewModel", "Error in updateRecommendation: ${e.message}", e)
+                errorMessage.value = "An unexpected error occurred."
+            }
+        }
     }
 
 }

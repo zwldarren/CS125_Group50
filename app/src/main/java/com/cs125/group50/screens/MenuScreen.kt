@@ -116,5 +116,21 @@ fun MenuScrollContent(navController: NavHostController, userId: String, context:
             Text("Synchronize Health Data")
         }
 
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = {
+                coroutineScope.launch {
+                    dashboardViewModel.updateRecommendation()
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+        ) {
+            Text("Refresh Recommendations")
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }
