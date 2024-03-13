@@ -46,7 +46,7 @@ def process_sleep_records(user_id, firebase_processor, records):
         start_time = record['startTime']
         
         sleep_structure = data.SleepStructure(date=date, duration=duration, end_time=end_time, stages=stage,
-                                              start_time=start_time, sleep_model=sleep_model)
+                                              start_time=start_time)
         sleep_structure_dict = sleep_structure.sleep_dict()
         sleep_score = calculate_sleep_score(sleep_structure_dict, sleep_model)
         sleep_structure_dict["sleepScore"] = sleep_score
@@ -66,7 +66,7 @@ def process_exercise_records(user_id, firebase_processor, records):
 
 def process_diet_records(user_id, firebase_processor, records):
     for record in records:
-        calories = record['caloriesPerHundredGrams']
+        calories = record['totalCalories']
         date = record['date']
         amount = record['foodAmount']
         name = record['foodName']

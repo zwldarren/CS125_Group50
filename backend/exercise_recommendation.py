@@ -1,4 +1,4 @@
-def generate_exercise_advice(exercise_score, enough_info, weekly_exercise_sessions, weekly_calorie_intake, weekly_calorie_burn):
+def generate_exercise_advice(exercise_score, enough_info, weekly_exercise_sessions, calorie_difference):
     actions = {
         "no enough data": "Less than 7 days of exercise user information recorded. To gain better insight into your exercise patterns, consider using a fitness tracking device or manually logging your activities.",
         "low frequency, exercise score less than 2": "Focus on building a consistent exercise routine with light activities such as daily walks or gentle yoga. Aim for 15-20 minutes per session, 3 times a week to gradually increase your fitness level.",
@@ -26,8 +26,6 @@ def generate_exercise_advice(exercise_score, enough_info, weekly_exercise_sessio
         "calorie balanced, frequent, exercise score between 8 and 10": "As a highly fit individual, focus on specialized or competitive training to further enhance your performance. Explore endurance sports, competitive weightlifting, or challenging fitness classes. Aim to mix high-intensity sessions with adequate rest and recovery practices to optimize performance and prevent injury."
 
     }
-
-    calorie_difference = weekly_calorie_intake - weekly_calorie_burn
 
     advice = []
     if not enough_info:
