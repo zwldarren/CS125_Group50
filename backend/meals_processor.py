@@ -11,9 +11,6 @@ class MealProcessor:
         self._db = db
         self._user_id = user_id
 
-    def set_db(self, db):
-        self._db = db
-
     def get_latest_meal_time(self):
         meals_ref = self._db.collection('users').document(self._user_id).collection('meals')
         try:
