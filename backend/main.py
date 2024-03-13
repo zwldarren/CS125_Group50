@@ -139,6 +139,10 @@ async def update_recommendation(user_id):
         diet_score = get_diet_score(extracted_hours_minutes, weight, height, age, gender,
                                     average_calories_burned_per_week, calorie_intake, calorie_burn)
 
+        sleep_day = sleep_processor.get_latest_sleep_time()
+        sleep_infos = sleep_processor.get_sleep_last_7_days(sleep_day)
+        sleep_score = sum(item['sleepScore'] for item in sleep_infos) / len(sleep_infos)
+
         return {
             "overall_recommendation": overall_recommendation,
             "exercise_recommendation": exercise_recommendation,

@@ -17,7 +17,7 @@ class SleepProcessor:
             print(f"An error occurred: {e}")
             return None
 
-    def get_activities_last_7_days(self, input_date):
+    def get_sleep_last_7_days(self, input_date):
         # 将输入的日期字符串转换为 datetime 对象
         end_date = datetime.strptime(input_date, "%Y-%m-%d")
         # 计算开始日期（7天前）
@@ -53,5 +53,5 @@ if __name__ == '__main__':
     activity_processor = SleepProcessor(db, user_id)
     day = activity_processor.get_latest_sleep_time()
     print(day)
-    infos = activity_processor.get_activities_last_7_days(day)
+    infos = activity_processor.get_sleep_last_7_days(day)
     print(infos)
