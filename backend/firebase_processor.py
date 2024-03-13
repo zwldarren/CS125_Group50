@@ -114,7 +114,7 @@ class FirebaseService:
 
     def get_user_info(self, user_id):
         """
-        根据用户 ID 获取特定用户的年龄、性别、身高和体重。
+        根据用户 ID 获取特定用户的年龄、性别、目标、身高和体重。
 
         :param user_id: 用户的 ID。
         :return: 包含用户信息的字典，如果用户不存在则返回 None。
@@ -126,8 +126,8 @@ class FirebaseService:
             return None
 
         user_data = user_doc.to_dict()
-        # 从用户文档中获取特定字段并存储到字典中
-        info_keys = ['age', 'gender', 'height', 'weight']
+        # 更新 info_keys 列表以包含 'goal'
+        info_keys = ['age', 'gender', 'goal', 'height', 'weight']
         user_info = {key: user_data.get(key, None) for key in info_keys}
         return user_info
 
