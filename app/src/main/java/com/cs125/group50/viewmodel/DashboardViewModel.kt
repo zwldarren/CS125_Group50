@@ -3,6 +3,7 @@ package com.cs125.group50.viewmodel
 import android.content.Context
 import android.os.RemoteException
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
@@ -48,6 +49,8 @@ class DashboardViewModel(context: Context) : ViewModel() {
         .baseUrl("http://localhost/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
+
+    var respone_result: String? = null
 
 
     // define the permissions required to access the data, find the list of permissions here:
@@ -131,7 +134,7 @@ class DashboardViewModel(context: Context) : ViewModel() {
                 "Lean Beef: Beef tomato stew, beef salad wrap, lean beef stir-fry with vegetables.\n"
     }
 
-    suspend fun synchronizeHealthData() {
+    suspend fun synchronizeHealthData(context: Context) {
         viewModelScope.launch {
             if (healthConnectManager.hasAllPermissions(requiredPermissions)) {
                 val endTime: Instant = Instant.now()
@@ -210,15 +213,18 @@ class DashboardViewModel(context: Context) : ViewModel() {
                     override fun onResponse(call: Call<Void>, response: retrofit2.Response<Void>) {
                         if (response.isSuccessful) {
                             // server successfully received the data
+                            Toast.makeText(context, "Connect success!", Toast.LENGTH_SHORT).show()
                             Log.d("ApiResponse", "Success: Data sent successfully")
                         } else {
                             // server returned an error
+                            Toast.makeText(context, "Connect fail!", Toast.LENGTH_SHORT).show()
                             Log.d("ApiResponse", "Error: ${response.errorBody()?.string()}")
                         }
                     }
 
                     override fun onFailure(call: Call<Void>, t: Throwable) {
                         // request failed
+                        Toast.makeText(context, "Connect fail!", Toast.LENGTH_SHORT).show()
                         Log.d("ApiResponse", "Failure: ${t.message}")
                     }
                 })
