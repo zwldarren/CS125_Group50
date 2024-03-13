@@ -66,7 +66,7 @@ def process_exercise_records(user_id, firebase_processor, records):
 
 def process_diet_records(user_id, firebase_processor, records):
     for record in records:
-        calories = record['caloriesPerHundredGrams']
+        calories = record['totalCalories']
         date = record['date']
         amount = record['foodAmount']
         name = record['foodName']
