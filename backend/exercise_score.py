@@ -61,71 +61,9 @@ def calculate_score(tdee, calorie_intake, calorie_burn):
     return score, calorie_difference
 
 
-from datetime import datetime
 
 
-def calculate_bmr(weight, height, age, gender):
-    if gender == 'male':
-        bmr = (10 * weight + 6.25 * height - 5 * age + 5) * 1000
-    else:
-        bmr = (10 * weight + 6.25 * height - 5 * age - 161) * 1000
-    return bmr
-
-
-def calculate_tdee(bmr, average_calories_burned_per_week):
-    daily_average_calories_burned = average_calories_burned_per_week / 7
-    if daily_average_calories_burned < 200000:
-        activity_level = 'sedentary'
-    elif 200000 <= daily_average_calories_burned < 400000:
-        activity_level = 'light'
-    elif 400000 <= daily_average_calories_burned < 600000:
-        activity_level = 'moderate'
-    elif 600000 <= daily_average_calories_burned < 800000:
-        activity_level = 'active'
-    else:
-        activity_level = 'very_active'
-
-    activity_factors = {
-        'sedentary': 1.2,
-        'light': 1.375,
-        'moderate': 1.55,
-        'active': 1.725,
-        'very_active': 1.9,
-    }
-
-    return bmr * activity_factors[activity_level]
-
-
-def calculate_score(tdee, calorie_intake, calorie_burn):
-    calorie_difference = calorie_intake - (tdee - calorie_burn)
-    abs_diff = abs(calorie_difference)
-
-    if abs_diff > 1000000:
-        score = 0
-    elif abs_diff > 900000:
-        score = 1
-    elif abs_diff > 800000:
-        score = 2
-    elif abs_diff > 700000:
-        score = 3
-    elif abs_diff > 600000:
-        score = 4
-    elif abs_diff > 500000:
-        score = 5
-    elif abs_diff > 400000:
-        score = 6
-    elif abs_diff > 300000:
-        score = 7
-    elif abs_diff > 200000:
-        score = 8
-    elif abs_diff > 100000:
-        score = 9
-    else:
-        score = 10
-
-    return score, calorie_difference
-
-def get_diet_score(weight, height, age, gender, average_calories_burned_per_week,calorie_intake, calorie_burn):
+def get_exercise_score(weight, height, age, gender, average_calories_burned_per_week,calorie_intake, calorie_burn):
     # 计算得分的总函数
     bmr = calculate_bmr(weight, height, age, gender)
     tdee = calculate_tdee(bmr, average_calories_burned_per_week)
@@ -148,7 +86,7 @@ if __name__ == "__main__":
     # score, calorie_difference = calculate_score(tdee, calorie_intake, calorie_burn)
 
     # call这个计算得分和总函数
-    fin_score,fin_calorie_difference = get_diet_score(weight, height, age, gender, average_calories_burned_per_week,calorie_intake, calorie_burn)
+    fin_score,fin_calorie_difference = get_exercise_score(weight, height, age, gender, average_calories_burned_per_week,calorie_intake, calorie_burn)
 
 
     print(

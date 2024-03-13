@@ -35,7 +35,7 @@ def calculate_meal_count_score(meal_times):
         return 10
     else:
         # 每缺少一餐扣3.33分，最少为0分
-        return max(0, 10 - (3 - total_meals) * 3.33)
+        return max(0.0, 10.0 - (3 - total_meals) * 3.33)
 
 
 # 卡路里消耗/摄入得分
@@ -118,7 +118,7 @@ def get_diet_score(meal_times, weight, height, age, gender, average_calories_bur
     calorie_score = get_calories_difference_score(weight, height, age, gender,
                                                   average_calories_burned_per_week, calorie_intake,
                                                   calorie_burn)
-    total_diet_score = (calorie_score * 0.5) + (time_score * 0.3) + (count_score * 0.2)
+    total_diet_score = (calorie_score * 0.7) + (time_score * 0.1) + (count_score * 0.2)
     return total_diet_score
 
 
