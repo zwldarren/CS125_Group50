@@ -52,11 +52,11 @@ def calculate_tdee(bmr, average_calories_burned_per_week):
     daily_average_calories_burned = average_calories_burned_per_week / 7
     if daily_average_calories_burned < 2000000:
         activity_level = 'sedentary'
-    elif 2000 <= daily_average_calories_burned < 4000000:
+    elif 2000000 <= daily_average_calories_burned < 4000000:
         activity_level = 'light'
-    elif 4000 <= daily_average_calories_burned < 6000000:
+    elif 4000000 <= daily_average_calories_burned < 6000000:
         activity_level = 'moderate'
-    elif 6000 <= daily_average_calories_burned < 8000000:
+    elif 6000000 <= daily_average_calories_burned < 8000000:
         activity_level = 'active'
     else:
         activity_level = 'very_active'
@@ -76,28 +76,28 @@ def calculate_score(tdee, calorie_intake, calorie_burn):
     calorie_difference = calorie_intake - (tdee - calorie_burn)
     abs_diff = abs(calorie_difference)
 
-    if abs_diff > 2000000:
-        score = 10
-    elif abs_diff > 1800000:
-        score = 9
-    elif abs_diff > 1600000:
-        score = 8
-    elif abs_diff > 1400000:
-        score = 7
-    elif abs_diff > 1200000:
-        score = 6
-    elif abs_diff > 1000000:
-        score = 5
-    elif abs_diff > 800000:
-        score = 4
-    elif abs_diff > 600000:
-        score = 3
-    elif abs_diff > 400000:
-        score = 2
-    elif abs_diff > 200000:
+    if abs_diff > 1000000:
+        score = 0
+    elif abs_diff > 900000:
         score = 1
+    elif abs_diff > 800000:
+        score = 2
+    elif abs_diff > 700000:
+        score = 3
+    elif abs_diff > 600000:
+        score = 4
+    elif abs_diff > 500000:
+        score = 5
+    elif abs_diff > 400000:
+        score = 6
+    elif abs_diff > 300000:
+        score = 7
+    elif abs_diff > 200000:
+        score = 8
+    elif abs_diff > 100000:
+        score = 9
     else:
-        score = 0  # 健康范围内
+        score = 10  # 健康范围内
 
     return score
 
@@ -122,22 +122,21 @@ def get_diet_score(meal_times, weight, height, age, gender, average_calories_bur
     return total_diet_score
 
 
-# 示例用户
-weight = 70  # kg
-height = 175  # cm
-age = 30
-gender = 'male'
+if __name__ == "__main__":
+    # 示例用户数据
+    weight = 70  # kg
+    height = 175  # cm
+    age = 30
+    gender = 'male'
 
-average_calories_burned_per_week = 1400000  # 用户每周平均运动消耗的卡路里
+    average_calories_burned_per_week = 1400000  # 用户上周运动消耗的总卡路里
+    calorie_intake = 2500000  # 用户每日摄入卡路里
+    calorie_burn = 200000  # 用户每日通过运动消耗的卡路里
 
-calorie_intake = 2500000  # 用户每日摄入卡路里
-calorie_burn = 200000  # 用户每日通过运动消耗的卡路里
+    meal_times = ['08:00', '13:00', '20:00', '20:30', '18:30']
 
-meal_times = ['08:00', '13:00', '20:00', '20:30', '18:30']
+    fin_score = get_diet_score(meal_times, weight, height, age, gender,
+                               average_calories_burned_per_week, calorie_intake, calorie_burn)
 
-fin_score = get_diet_score(meal_times, weight, height, age, gender,
-                           average_calories_burned_per_week, calorie_intake, calorie_burn)
-
-print(f"Diet Score: {fin_score:.2f}")
-
+    print(f"Diet Score: {fin_score:.2f}")
 
