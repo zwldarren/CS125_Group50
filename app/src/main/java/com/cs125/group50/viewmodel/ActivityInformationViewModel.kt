@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cs125.group50.data.ActivityInfo
+import com.google.firebase.firestore.Query
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -20,6 +21,7 @@ class ActivityInformationViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val documents = db.collection("users").document(userId).collection("activity")
+                    .orderBy("date", Query.Direction.DESCENDING) // sorted by date
                     .limit(5)
                     .get()
                     .await() // 使用 Kotlin 协程的 await，确保已添加相应依赖

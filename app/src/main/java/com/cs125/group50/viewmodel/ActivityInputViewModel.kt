@@ -15,7 +15,7 @@ class ActivityInputViewModel : ViewModel() {
 
     private val db = Firebase.firestore
 
-    fun saveActivityInfo(userId: String, activityType: String, startTime: LocalTime, endTime: LocalTime, selectedDate: LocalDate) {
+    fun saveActivityInfo(userId: String, activityType: String, startTime: LocalTime, endTime: LocalTime, selectedDate: LocalDate, caloriesBurned: Int) {
         var startDateTime = LocalDateTime.of(selectedDate, startTime)
         var endDateTime = LocalDateTime.of(selectedDate, endTime)
 
@@ -30,7 +30,8 @@ class ActivityInputViewModel : ViewModel() {
             "date" to selectedDate.toString(),
             "startTime" to startTime.toString(),
             "endTime" to endTime.toString(),
-            "duration" to duration.toString()
+            "duration" to duration.toString(),
+            "caloriesBurned" to caloriesBurned.toString()
         )
 
         viewModelScope.launch {

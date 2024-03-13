@@ -13,6 +13,8 @@ import androidx.navigation.NavHostController
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cs125.group50.viewmodel.ActivityInputViewModel
 import java.time.LocalDate
@@ -33,6 +35,7 @@ fun ActivityInputScreen(navController: NavHostController, userId: String) {
     val viewModel: ActivityInputViewModel = viewModel()
     var showDatePicker by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
+    var caloriesBurned by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -69,6 +72,16 @@ fun ActivityInputScreen(navController: NavHostController, userId: String) {
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = caloriesBurned,
+            onValueChange = { caloriesBurned = it },
+            label = { Text("Calories Burned") },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number) // 仅允许输入数字
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         TextButton(onClick = { showDatePicker = true }) {
             Text(text = "Select Date: ${selectedDate.format(DateTimeFormatter.ISO_LOCAL_DATE)}")
@@ -111,7 +124,8 @@ fun ActivityInputScreen(navController: NavHostController, userId: String) {
 
         Button(
             onClick = {
-                viewModel.saveActivityInfo(userId, activityType, startTime, endTime, selectedDate)
+                val caloriesBurnedInt = caloriesBurned.toIntOrNull() ?: 0
+                viewModel.saveActivityInfo(userId, activityType, startTime, endTime, selectedDate, caloriesBurnedInt)
                 navController.popBackStack()
             },
             enabled = activityType.isNotEmpty()
