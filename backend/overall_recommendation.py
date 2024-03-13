@@ -32,7 +32,7 @@ def provide_final_recommendation(overall_score, user_goal):
     }
 
     advice = []
-    if user_goal == "sleep":
+    if user_goal == "Sleep":
         if overall_score <= 2:
             advice.append(recommendations["sleep, overall score less than 2, and correlation advice"])
         elif overall_score <= 4:
@@ -43,7 +43,7 @@ def provide_final_recommendation(overall_score, user_goal):
             advice.append(recommendations["sleep, overall score between 6 and 8, and correlation advice"])
         elif overall_score <= 10:
             advice.append(recommendations["sleep, overall score between 8 and 10, and correlation advice"])
-    elif user_goal == "exercise":
+    elif user_goal == "Exercise":
         if overall_score <= 2:
             advice.append(recommendations["exercise, overall score less than 2, and correlation advice"])
         elif overall_score <= 4:
@@ -54,7 +54,7 @@ def provide_final_recommendation(overall_score, user_goal):
             advice.append(recommendations["exercise, overall score between 6 and 8, and correlation advice"])
         elif overall_score <= 10:
             advice.append(recommendations["exercise, overall score between 8 and 10, and correlation advice"])
-    elif user_goal == "diet":
+    elif user_goal == "Diet":
         if overall_score <= 2:
             advice.append(recommendations["diet, overall score less than 2, and correlation advice"])
         elif overall_score <= 4:
