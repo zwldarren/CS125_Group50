@@ -49,7 +49,7 @@ fun DietScrollContent(navController: NavHostController, userId: String) {
 
         dietInfoList.forEach { dietInfo ->
             // Display each diet information here
-            Text("Date: ${dietInfo.date}, Time: ${dietInfo.time}, Meal Type: ${dietInfo.mealType}, Food Name: ${dietInfo.foodName}, Total calories: ${(dietInfo.foodAmount).toDouble()*(dietInfo.caloriesPerHundredGrams).toDouble()}")
+            Text("Date: ${dietInfo.date}, Time: ${dietInfo.time}, Meal Type: ${dietInfo.mealType}, Food Name: ${dietInfo.foodName}, Total calories: ${dietInfo.totalCalories}")
             Spacer(modifier = Modifier.height(8.dp))
         }
 

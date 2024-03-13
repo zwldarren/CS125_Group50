@@ -5,6 +5,7 @@ import android.os.RemoteException
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
@@ -24,6 +25,7 @@ import com.cs125.group50.data.SleepInfo
 import com.cs125.group50.data.SleepStage
 import com.cs125.group50.data.UserInfo
 import com.cs125.group50.utils.ApiService
+import com.firebase.ui.auth.AuthUI.getApplicationContext
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.functions.ktx.functions
@@ -157,14 +159,14 @@ class DashboardViewModel(context: Context) : ViewModel() {
                             caloriesBurned = record["caloriesBurned"] ?: "",
                             date = record["date"] ?: ""
                         )
-                }
+                    }
 
                 val dietInfos = dietRecords.map { record ->
                     DietInfo(
                         mealType = record.mealType.toString(),
                         foodName = "",
                         totalFat = record.totalFat?.inGrams.toString(),
-                        caloriesPerHundredGrams = record.energy?.inKilocalories.toString(),
+                        totalCalories = record.energy?.inCalories.toString(),
                         foodAmount = "",
                         date = record.startTime.atZone(ZoneId.of("America/Los_Angeles")).toLocalDate().toString(),
                         time = record.startTime.atZone(ZoneId.of("America/Los_Angeles")).toLocalTime().toString(),
@@ -259,7 +261,7 @@ class DashboardViewModel(context: Context) : ViewModel() {
             "mealType" to dietInfo.mealType,
             "foodName" to dietInfo.foodName,  // 假设这些信息已正确获取
             "totalFat" to dietInfo.totalFat,
-            "caloriesPerHundredGrams" to dietInfo.caloriesPerHundredGrams,
+            "totalCalories" to dietInfo.totalCalories,
             "foodAmount" to dietInfo.foodAmount,
             "date" to dietInfo.date,  // 你需要确保这个值在dietInfo对象创建时被正确设置
             "time" to dietInfo.time   // 同上

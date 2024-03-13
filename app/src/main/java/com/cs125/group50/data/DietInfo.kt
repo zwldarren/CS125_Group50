@@ -7,7 +7,7 @@ data class DietInfo(
     val mealType: String,
     val foodName: String,
     val totalFat: String,
-    val caloriesPerHundredGrams: String,
+    val totalCalories: String,
     val foodAmount: String,
     val date: String,
     val time: String
