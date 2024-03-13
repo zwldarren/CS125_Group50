@@ -22,13 +22,13 @@ class FirebaseService:
             app = firebase_admin.initialize_app(cred)
         return firestore.client(app)
 
-    def get_user_info(self, user_id: str):
-        doc_ref = self.db.collection('users').document(user_id)
-        doc = doc_ref.get()
-        if doc.exists:
-            return doc.to_dict()
-        else:
-            return None
+    # def get_user_info(self, user_id: str):
+    #     doc_ref = self.db.collection('users').document(user_id)
+    #     doc = doc_ref.get()
+    #     if doc.exists:
+    #         return doc.to_dict()
+    #     else:
+    #         return None
 
     def get_collections_for_user(self, user_ref):
         """
@@ -112,3 +112,28 @@ class FirebaseService:
             print("Data already exists")
             return 0
 
+    def get_user_info(self, user_id):
+        """
+        根据用户 ID 获取特定用户的年龄、性别、身高和体重。
+
+        :param user_id: 用户的 ID。
+        :return: 包含用户信息的字典，如果用户不存在则返回 None。
+        """
+        user_ref = self.db.collection('users').document(user_id)
+        user_doc = user_ref.get()
+        if not user_doc.exists:
+            print(f"User {user_id} not found.")
+            return None
+
+        user_data = user_doc.to_dict()
+        # 从用户文档中获取特定字段并存储到字典中
+        info_keys = ['age', 'gender', 'height', 'weight']
+        user_info = {key: user_data.get(key, None) for key in info_keys}
+        return user_info
+
+
+if __name__ == '__main__':
+    firebase_service = FirebaseService("serviceAccountKey.json")
+    user_id = "YpM0a1jDTrN2gRK96Worx89Ln0Q2"
+    info = firebase_service.get_user_info(user_id)
+    print(info)
