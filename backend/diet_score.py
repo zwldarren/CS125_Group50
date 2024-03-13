@@ -35,7 +35,7 @@ def calculate_meal_count_score(meal_times):
         return 10
     else:
         # 每缺少一餐扣3.33分，最少为0分
-        return max(0, 10 - (3 - total_meals) * 3.33)
+        return max(0.0, 10.0 - (3 - total_meals) * 3.33)
 
 
 # 卡路里消耗/摄入得分
