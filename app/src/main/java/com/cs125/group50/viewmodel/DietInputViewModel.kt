@@ -14,12 +14,12 @@ class DietInputViewModel : ViewModel() {
 
     private val db = Firebase.firestore
 
-    fun saveDietInfo(userId: String, mealType: String, foodName: String, caloriesPerHundredGrams: String, foodAmount: String, selectedDate: LocalDate,
+    fun saveDietInfo(userId: String, mealType: String, foodName: String, totalCalories: String, foodAmount: String, selectedDate: LocalDate,
                      selectedTime: LocalTime) {
         val dietInfo = hashMapOf(
             "mealType" to mealType,
             "foodName" to foodName,
-            "caloriesPerHundredGrams" to caloriesPerHundredGrams,
+            "totalCalories" to totalCalories,
             "foodAmount" to foodAmount,
             "date" to selectedDate.toString(), // Storing the date as a String
             "time" to selectedTime.toString()  // Storing the time as a String

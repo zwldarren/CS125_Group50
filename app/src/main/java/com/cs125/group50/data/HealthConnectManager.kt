@@ -149,7 +149,7 @@ class HealthConnectManager(private val context: Context) {
             )
             val caloriesBurnedDuringExercise = caloriesRecords.filter {
                 it.startTime >= exerciseRecord.startTime && it.endTime <= exerciseRecord.endTime
-            }.sumOf { it.energy.inKilocalories }
+            }.sumOf { it.energy.inCalories }
 
             mapOf(
                 "activityType" to exerciseRecord.exerciseType.toString(),
@@ -186,7 +186,7 @@ class HealthConnectManager(private val context: Context) {
                 )
             )
             // Convert total energy to kilocalories, may be null if no data is available
-            response[TotalCaloriesBurnedRecord.ENERGY_TOTAL]?.inKilocalories ?: 0.0
+            response[TotalCaloriesBurnedRecord.ENERGY_TOTAL]?.inCalories ?: 0.0
         } catch (e: Exception) {
             0.0 // Or handle error more appropriately
         }
