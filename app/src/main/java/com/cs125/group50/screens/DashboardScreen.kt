@@ -79,6 +79,9 @@ fun MainScrollContent(viewModel: DashboardViewModel) {
                     style = MaterialTheme.typography.bodyLarge)
             }
         }
+        item {
+            Spacer(modifier = Modifier.height(80.dp))
+        }
     }
 }
 
