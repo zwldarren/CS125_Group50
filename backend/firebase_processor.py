@@ -13,7 +13,7 @@ class FirebaseService:
 
     def init_firebase(self):
         """
-        初始化Firebase应用并获取Firestore数据库的引用。
+        Initialize Firebase application and get a reference to the Firestore database.
         """
         try:
             app = firebase_admin.get_app()
@@ -32,10 +32,10 @@ class FirebaseService:
 
     def get_collections_for_user(self, user_ref):
         """
-        获取指定用户文档下的所有子集合及其文档。
+        Get all sub-collections and their documents for a given user document reference.
 
-        :param user_ref: 指向用户文档的引用。
-        :return: 一个字典，键为集合名称，值为该集合中所有文档的列表。
+        :param user_ref: A reference to a user document.
+        :return: A dictionary with collection names as keys and lists of all documents in that collection as values.
         """
         collections_result = {}
         collections = user_ref.collections()
@@ -48,10 +48,10 @@ class FirebaseService:
 
     def get_user_with_collections(self, user_id: str):
         """
-        获取特定用户的信息以及该用户下的所有子集合。
+        Get information for a specific user and all sub-collections under that user.
 
-        :param user_id: 用户的ID。
-        :return: 一个包含用户信息和子集合信息的字典。
+        :param user_id: The ID of the user.
+        :return: A dictionary containing user information and sub-collection information.
         """
         user_ref = self.db.collection('users').document(user_id)
         user_doc = user_ref.get()
@@ -65,45 +65,45 @@ class FirebaseService:
 
     def save_data(self, user_id: str, collection_name: str, data: dict):
         """
-        根据不同的集合名称和data中的可用数据，保存特定用户的数据到相应的子集合中。
+        Save data for a specific user into a respective sub-collection based on collection name and data provided.
 
-        :param user_id: 用户的ID。
-        :param collection_name: 子集合的名称。
-        :param data: 要保存的数据。
+        :param user_id: The ID of the user.
+        :param collection_name: The name of the sub-collection.
+        :param data: The data to be saved.
         """
         user_ref = self.db.collection('users').document(user_id)
         collection_ref = user_ref.collection(collection_name)
 
-        # 更新定义，包括一个新的集合，它不需要任何查询条件
+        # Definitions for query conditions based on collection name
         query_conditions_template = {
             'sleep': [('date', '=='), ('startTime', '==')],
             'meals': [('date', '=='), ('time', '==')],
             'activity': [('activityType', '=='), ('date', '=='), ('startTime', '=='), ('caloriesBurned', '==')],
-            'heartRate': []  # 新集合不应用任何查询条件
+            'heartRate': []  # New collections should not apply any query condition
         }
 
         conditions_template = query_conditions_template.get(collection_name, [])
 
-        # 对于不需要查询条件的集合，直接添加数据
-        if not conditions_template:  # 如果条件模板为空
+        # For collections without query conditions, directly add data
+        if not conditions_template:  # If the conditions template is empty
             collection_ref.add(data)
             print("Data added to unrestricted collection.")
             return 1
 
-        # 动态构建查询条件，确保data中存在相应的键
+        # Dynamically build query conditions, ensuring keys exist in data
         conditions = [(field, op, data[field]) for field, op in conditions_template if field in data]
 
-        # 如果data中缺少必要的字段，则不进行添加操作
+        # If necessary fields are missing in data, do not proceed with add operation
         if len(conditions) != len(conditions_template):
             return 0
 
-        # 构建并执行查询
+        # Build and execute the query
         query = collection_ref
         for field, op, value in conditions:
             query = query.where(field, op, value)
         query = query.limit(1).get()
 
-        # 检查查询结果，若不存在则添加新数据
+        # Check query result, if no document exists then add new data
         if not list(query):
             collection_ref.add(data)
             print("Data added")
@@ -114,10 +114,10 @@ class FirebaseService:
 
     def get_user_info(self, user_id):
         """
-        根据用户 ID 获取特定用户的年龄、性别、目标、身高和体重。
+        Get specific user's age, gender, goal, height, and weight by user ID.
 
-        :param user_id: 用户的 ID。
-        :return: 包含用户信息的字典，如果用户不存在则返回 None。
+        :param user_id: The ID of the user.
+        :return: A dictionary containing user information, or None if the user does not exist.
         """
         user_ref = self.db.collection('users').document(user_id)
         user_doc = user_ref.get()
@@ -126,7 +126,7 @@ class FirebaseService:
             return None
 
         user_data = user_doc.to_dict()
-        # 更新 info_keys 列表以包含 'goal'
+        # Update info_keys list to include 'goal'
         info_keys = ['age', 'gender', 'goal', 'height', 'weight']
         user_info = {key: user_data.get(key, None) for key in info_keys}
         return user_info

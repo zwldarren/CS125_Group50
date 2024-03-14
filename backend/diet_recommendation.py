@@ -1,4 +1,3 @@
-#enough_info 是Boolean, 其他都是int, 这些都是提取用户过去五天，然后得出, duration为hour，start_time_variance也为hour
 def generate_diet_advice(diet_score, calorie_difference, meal_times):
     actions = {
 

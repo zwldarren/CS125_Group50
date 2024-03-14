@@ -10,6 +10,7 @@ class ActivityProcessor:
     def get_latest_meal_time(self):
         activity_ref = self._db.collection('users').document(self._user_id).collection('activity')
         try:
+            # Retrieve the most recent meal activity
             latest_meal = activity_ref.order_by('date', direction='DESCENDING').limit(1).get()
             for meal in latest_meal:
                 return meal.to_dict()["date"]  # Return the latest meal as a dictionary
@@ -18,14 +19,14 @@ class ActivityProcessor:
             return None
 
     def get_activities_last_7_days(self, input_date):
-        # 将输入的日期字符串转换为 datetime 对象
+        # Convert the input date string to a datetime object
         end_date = datetime.strptime(input_date, "%Y-%m-%d")
-        # 计算开始日期（7天前）
+        # Calculate the start date (7 days ago)
         start_date = end_date - timedelta(days=7)
 
         activities_ref = self._db.collection('users').document(self._user_id).collection('activity')
         try:
-            # 查询这个日期范围内的所有活动
+            # Query all activities within this date range
             activities = activities_ref.where('date', '>=', start_date.strftime("%Y-%m-%d")) \
                 .where('date', '<=', end_date.strftime("%Y-%m-%d")) \
                 .order_by('date', direction='ASCENDING').get()

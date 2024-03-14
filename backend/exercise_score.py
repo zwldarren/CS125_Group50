@@ -7,7 +7,7 @@ def calculate_bmr(weight, height, age, gender):
 
 
 def calculate_tdee(bmr, average_calories_burned_per_week):
-    # 考虑到运动手表的会记录包括轻微活动如步行，因此主要判断条件是日平均消耗卡路里
+    # Considering that sports watches record including light activities like walking, the main criterion is the daily average calorie burn
     daily_average_calories_burned = average_calories_burned_per_week / 7
     if daily_average_calories_burned < 200000:
         activity_level = 'sedentary'
@@ -36,17 +36,17 @@ def calculate_score(tdee, calorie_intake, calorie_burn):
     calorie_difference = calorie_intake - (tdee + calorie_burn)
     abs_diff = abs(calorie_difference)
 
-    # 设置最大差异阈值，超过这个值得分为0
+    # Set maximum difference threshold, score is 0 beyond this value
     max_diff = 2000000
 
-    # 计算得分，差异越大，得分越低
+    # Calculate score, the greater the difference, the lower the score
     score = max(0, 10 - (abs_diff / max_diff) * 10)
 
     return score, calorie_difference
 
 
 def get_exercise_score(weight, height, age, gender, average_calories_burned_per_week, calorie_intake, calorie_burn):
-    # 计算得分的总函数
+    # Function to calculate the total score
     bmr = calculate_bmr(weight, height, age, gender)
     tdee = calculate_tdee(bmr, average_calories_burned_per_week)
     fin_score, fin_calorie_difference = calculate_score(tdee, calorie_intake, calorie_burn)
@@ -56,20 +56,20 @@ def get_exercise_score(weight, height, age, gender, average_calories_burned_per_
 
 
 if __name__ == "__main__":
-    # 示例用户数据
+    # Example user data
     weight = 70  # kg
     height = 175  # cm
     age = 30
     gender = 'male'
-    average_calories_burned_per_week = 1400000  # 用户上周运动消耗的总卡路里
-    calorie_intake = 2500000  # 用户每日摄入卡路里
-    calorie_burn = 200000  # 用户每日通过运动消耗的卡路里
+    average_calories_burned_per_week = 1400000  # Total calories burned in exercise last week
+    calorie_intake = 2500000  # Daily calorie intake
+    calorie_burn = 200000  # Daily calories burned through exercise
 
     bmr = calculate_bmr(weight, height, age, gender)
     tdee = calculate_tdee(bmr, average_calories_burned_per_week)
     # score, calorie_difference = calculate_score(tdee, calorie_intake, calorie_burn)
 
-    # call这个计算得分和总函数
+    # Call the function to calculate score and total
     fin_score, fin_calorie_difference = get_exercise_score(weight, height, age, gender,
                                                            average_calories_burned_per_week, calorie_intake,
                                                            calorie_burn)

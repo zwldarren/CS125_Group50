@@ -1,4 +1,3 @@
-#enough_info 是Boolean, 其他都是int, 这些都是提取用户过去7天，然后得出, duration为hour，start_time_variance也为hour
 def generate_sleep_advice(sleep_score, sleep_start_time_variance, sleep_times_per_day, sleep_duration):
     actions = {
         "nap in a day, sleep score less than 2": "Eliminate napping during the day to ensure a more consolidated and restorative night's sleep.",

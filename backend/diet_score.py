@@ -1,7 +1,7 @@
 from datetime import datetime
 
 
-# 吃饭时间得分
+# Calculate mealtime score
 def calculate_mealtime_score(meal_times):
     ideal_times = {
         'breakfast': ('07:00', '09:00'),
@@ -25,20 +25,20 @@ def calculate_mealtime_score(meal_times):
     return score
 
 
-# 餐食次数得分
+# Calculate meal count score
 def calculate_meal_count_score(meal_times):
     if not meal_times:
-        return 0  # 0分如果没有数据
+        return 0  # 0 points if no data
 
-    total_meals = len(set(meal_times))  # 使用set去重 多次相同餐点时间只计算一次
+    total_meals = len(set(meal_times))  # Use set to remove duplicates, counting each meal time only once
     if total_meals >= 3:
         return 10
     else:
-        # 每缺少一餐扣3.33分，最少为0分
+        # Deduct 3.33 points for each missing meal, minimum score is 0
         return max(0.0, 10.0 - (3 - total_meals) * 3.33)
 
 
-# 卡路里消耗/摄入得分
+# Calculate calorie burn/intake score
 def calculate_bmr(weight, height, age, gender):
     if gender == 'male':
         bmr = (10 * weight + 6.25 * height - 5 * age + 5) * 1000
@@ -48,7 +48,7 @@ def calculate_bmr(weight, height, age, gender):
 
 
 def calculate_tdee(bmr, average_calories_burned_per_week):
-    # 考虑到运动手表的会记录包括轻微活动如步行，因此主要判断条件是日平均消耗卡路里
+    # Considering smartwatches record all activities including light movements like walking, main criteria is the daily average calorie burn
     daily_average_calories_burned = average_calories_burned_per_week / 7
     if daily_average_calories_burned < 2000000:
         activity_level = 'sedentary'
@@ -76,10 +76,10 @@ def calculate_score(tdee, calorie_intake, calorie_burn):
     calorie_difference = calorie_intake - (tdee + calorie_burn)
     abs_diff = abs(calorie_difference)
 
-    # 设置最大差异阈值，超过这个值得分为0
+    # Set a maximum difference threshold, scores are 0 beyond this value
     max_diff = 2000000
 
-    # 计算得分，差异越大，得分越低
+    # The larger the difference, the lower the score
     score = max(0, 10 - (abs_diff / max_diff) * 10)
 
     return score
@@ -94,7 +94,7 @@ def get_calories_difference_score(weight, height, age, gender, average_calories_
     return score
 
 
-# 计算总分
+# Calculate total score
 def get_diet_score(meal_times, weight, height, age, gender, average_calories_burned_per_week,
                    calorie_intake, calorie_burn):
     time_score = calculate_mealtime_score(meal_times)
@@ -108,15 +108,15 @@ def get_diet_score(meal_times, weight, height, age, gender, average_calories_bur
 
 
 if __name__ == "__main__":
-    # 示例用户数据
+    # user example
     weight = 70  # kg
     height = 175  # cm
     age = 30
     gender = 'male'
 
-    average_calories_burned_per_week = 1400000  # 用户上周运动消耗的总卡路里
-    calorie_intake = 2500000  # 用户每日摄入卡路里
-    calorie_burn = 200000  # 用户每日通过运动消耗的卡路里
+    average_calories_burned_per_week = 1400000  # total calories burn this week
+    calorie_intake = 2500000  # calories(not kcal) intake today
+    calorie_burn = 200000  # calories(not kcal) burn today
 
     meal_times = ['08:00', '13:00', '20:00', '20:30', '18:30']
 
