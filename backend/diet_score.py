@@ -73,31 +73,14 @@ def calculate_tdee(bmr, average_calories_burned_per_week):
 
 
 def calculate_score(tdee, calorie_intake, calorie_burn):
-    calorie_difference = calorie_intake - (tdee - calorie_burn)
+    calorie_difference = calorie_intake - (tdee + calorie_burn)
     abs_diff = abs(calorie_difference)
 
-    if abs_diff > 1000000:
-        score = 0
-    elif abs_diff > 900000:
-        score = 1
-    elif abs_diff > 800000:
-        score = 2
-    elif abs_diff > 700000:
-        score = 3
-    elif abs_diff > 600000:
-        score = 4
-    elif abs_diff > 500000:
-        score = 5
-    elif abs_diff > 400000:
-        score = 6
-    elif abs_diff > 300000:
-        score = 7
-    elif abs_diff > 200000:
-        score = 8
-    elif abs_diff > 100000:
-        score = 9
-    else:
-        score = 10  # 健康范围内
+    # 设置最大差异阈值，超过这个值得分为0
+    max_diff = 2000000
+
+    # 计算得分，差异越大，得分越低
+    score = max(0, 10 - (abs_diff / max_diff) * 10)
 
     return score
 
@@ -107,6 +90,7 @@ def get_calories_difference_score(weight, height, age, gender, average_calories_
     bmr = calculate_bmr(weight, height, age, gender)
     tdee = calculate_tdee(bmr, average_calories_burned_per_week)
     score = calculate_score(tdee, calorie_intake, calorie_burn)
+
     return score
 
 
@@ -119,6 +103,7 @@ def get_diet_score(meal_times, weight, height, age, gender, average_calories_bur
                                                   average_calories_burned_per_week, calorie_intake,
                                                   calorie_burn)
     total_diet_score = (calorie_score * 0.7) + (time_score * 0.1) + (count_score * 0.2)
+    print(f"diet score: time_score: {time_score:.2f}, count_score: {count_score:.2f}, calorie_score: {calorie_score:.2f}, total_diet_score: {total_diet_score:.2f}")
     return total_diet_score
 
 

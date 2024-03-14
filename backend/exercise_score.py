@@ -32,32 +32,15 @@ def calculate_tdee(bmr, average_calories_burned_per_week):
 
 
 def calculate_score(tdee, calorie_intake, calorie_burn):
-    print(calorie_intake / 1000, tdee / 1000, calorie_burn / 1000)
-    calorie_difference = calorie_intake - (tdee - calorie_burn)
+    # print(calorie_intake / 1000, tdee / 1000, calorie_burn / 1000)
+    calorie_difference = calorie_intake - (tdee + calorie_burn)
     abs_diff = abs(calorie_difference)
 
-    if abs_diff > 1000000:
-        score = 0
-    elif abs_diff > 900000:
-        score = 1
-    elif abs_diff > 800000:
-        score = 2
-    elif abs_diff > 700000:
-        score = 3
-    elif abs_diff > 600000:
-        score = 4
-    elif abs_diff > 500000:
-        score = 5
-    elif abs_diff > 400000:
-        score = 6
-    elif abs_diff > 300000:
-        score = 7
-    elif abs_diff > 200000:
-        score = 8
-    elif abs_diff > 100000:
-        score = 9
-    else:
-        score = 10  # 健康范围内
+    # 设置最大差异阈值，超过这个值得分为0
+    max_diff = 2000000
+
+    # 计算得分，差异越大，得分越低
+    score = max(0, 10 - (abs_diff / max_diff) * 10)
 
     return score, calorie_difference
 
@@ -67,6 +50,8 @@ def get_exercise_score(weight, height, age, gender, average_calories_burned_per_
     bmr = calculate_bmr(weight, height, age, gender)
     tdee = calculate_tdee(bmr, average_calories_burned_per_week)
     fin_score, fin_calorie_difference = calculate_score(tdee, calorie_intake, calorie_burn)
+    print(
+        f"in kcal: BMR: {bmr / 1000:.2f}, TDEE: {tdee / 1000:.2f}, last week: {average_calories_burned_per_week / 1000:.2f}, Score: {fin_score:.2f}, Calorie difference: {fin_calorie_difference / 1000:.2f}, calorie_intake: {calorie_intake / 1000:.2f}, calorie_burn: {calorie_burn / 1000:.2f}")
     return fin_score, fin_calorie_difference
 
 
