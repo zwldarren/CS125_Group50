@@ -53,7 +53,7 @@ class DashboardViewModel(context: Context) : ViewModel() {
         HealthPermission.getReadPermission(NutritionRecord::class),
         HealthPermission.getReadPermission(TotalCaloriesBurnedRecord::class),
     )
-//    val healthConnectAvailability = healthConnectManager.availability
+    //    val healthConnectAvailability = healthConnectManager.availability
     var hasAllPermissions: MutableStateFlow<Boolean> = MutableStateFlow(false)
     var errorMessage: MutableStateFlow<String?> = MutableStateFlow(null)
 
@@ -95,7 +95,8 @@ class DashboardViewModel(context: Context) : ViewModel() {
                             gender = document.getString("gender") ?: "",
                             height = document.getLong("height")?.toInt() ?: 0,
                             weight = document.getLong("weight")?.toInt() ?: 0,
-                            age = document.getLong("age")?.toInt() ?: 0
+                            age = document.getLong("age")?.toInt() ?: 0,
+                            goal = document.getString("goal")?:""
                         )
                         _userInfo.value = user
                     }
@@ -295,10 +296,10 @@ class DashboardViewModel(context: Context) : ViewModel() {
                         append("Exercise Score: ${recommendation.exerciseScore}\n")
                         append("Diet Score: ${recommendation.dietScore}\n")
                         append("Sleep Score: ${recommendation.sleepScore}\n\n")
-                        append("Overall: ${recommendation.overallResponse}\n")
-                        append("Exercise: ${recommendation.exerciseResponse}\n")
-                        append("Diet: ${recommendation.dietResponse}\n")
-                        append("Sleep: ${recommendation.sleepResponse}")
+                        append("Overall advice: ${recommendation.overallResponse}\n")
+                        append("Exercise advice: ${recommendation.exerciseResponse}\n")
+                        append("Diet advice: ${recommendation.dietResponse}\n")
+                        append("Sleep advice: ${recommendation.sleepResponse}")
                     }
                     _healthAdvice.value = advice
                 } else {

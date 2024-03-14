@@ -56,6 +56,7 @@ fun MainScrollContent(viewModel: DashboardViewModel) {
                 Text("Height: ${userInfo?.height} cm")
                 Text("Weight: ${userInfo?.weight} kg")
                 Text("Age: ${userInfo?.age}")
+                Text("Goal: ${userInfo?.goal}")
 
                 val bmi = userInfo?.let { calculateBMI(it.height.toDouble(), it.weight.toDouble()) }
                 if (bmi != null) {
