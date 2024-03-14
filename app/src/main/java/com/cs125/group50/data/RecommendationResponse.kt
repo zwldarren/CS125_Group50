@@ -5,8 +5,8 @@ data class RecommendationResponse(
     val exerciseResponse: String,
     val sleepResponse: String,
     val dietResponse: String,
-    val overallScore: Int,
-    val exerciseScore: Int,
-    val sleepScore: Int,
-    val dietScore: Int
+    val overallScore: Float,
+    val exerciseScore: Float,
+    val sleepScore: Float,
+    val dietScore: Float
 )

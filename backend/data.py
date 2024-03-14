@@ -11,6 +11,17 @@ class HealthData(BaseModel):
     heartRateRecords: List
 
 
+class ResponseData(BaseModel):
+    overallScore: float
+    exerciseScore: float
+    dietScore: float
+    sleepScore: float
+    overallResponse: str
+    exerciseResponse: str
+    dietResponse: str
+    sleepResponse: str
+
+
 class SleepStructure:
     def __init__(self, date=None, duration=None, start_time=None, end_time=None, stages=None):
         self._date = date

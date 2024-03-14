@@ -179,16 +179,17 @@ async def update_recommendation(user_id):
         weekly_exercise_sessions_number = len(activity_info)
         exercise_recommendation = generate_exercise_advice(exercise_score, weekly_exercise_sessions_number, calorie_difference)
 
-        return {
-            "overall_recommendation": overall_recommendation,
-            "exercise_recommendation": exercise_recommendation,
-            "sleep_recommendation": sleep_recommendation,
-            "diet_recommendation": diet_recommendation,
-            "overall_score": overall_score,
-            "exercise_score": exercise_score,
-            "sleep_score": sleep_score,
-            "diet_score": diet_score
-        }
+        return data.ResponseData(
+            overallScore=overall_score,
+            exerciseScore=exercise_score,
+            dietScore=diet_score,
+            sleepScore=sleep_score,
+            overallResponse=overall_recommendation,
+            exerciseResponse=exercise_recommendation,
+            dietResponse=diet_recommendation,
+            sleepResponse=sleep_recommendation
+        )
+        
     except Exception as e:
         print(f"ERROR: {e}")
         return {"message": "Failed to generate recommendation"}
