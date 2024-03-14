@@ -9,6 +9,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.cs125.group50.ui.theme.VitalityTrackerTheme
 import androidx.navigation.compose.rememberNavController
+import com.chaquo.python.Python
+import com.chaquo.python.android.AndroidPlatform
 import com.cs125.group50.nav.AppNavigation
 import com.google.firebase.auth.FirebaseAuth
 
@@ -17,6 +19,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val auth = FirebaseAuth.getInstance()
+
+        if(!Python.isStarted()){
+            Python.start(AndroidPlatform(this))
+        }
 
         auth.addAuthStateListener { firebaseAuth ->
             val user = firebaseAuth.currentUser

@@ -1,6 +1,8 @@
 package com.cs125.group50.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -30,17 +32,20 @@ fun ActivityInformationScreen(navController: NavHostController, userId: String){
 fun ActivityScrollContent(navController: NavHostController, userId: String) {
     val viewModel: ActivityInformationViewModel = viewModel()
     LaunchedEffect(true) {
-        viewModel.loadActivityInfo()
+        viewModel.loadActivityInfo(userId)
     }
     val activityInfoList by viewModel.activityInfoList.collectAsState()
 
-    Column(modifier = Modifier.padding(16.dp)) {
-        Text("Your Activity Information", style = MaterialTheme.typography.headlineMedium)
+    Column(modifier = Modifier
+        .verticalScroll(rememberScrollState())
+        .padding(16.dp)) {
+        Spacer(modifier = Modifier.height(48.dp))
+        Text("Activity Information", style = MaterialTheme.typography.headlineMedium)
 
         Spacer(modifier = Modifier.height(16.dp))
 
         activityInfoList.forEach { activityInfo ->
-            Text("Activity: ${activityInfo.activityType}, Duration: ${activityInfo.duration}, Distance: ${activityInfo.distance}")
+            Text("Activity: ${activityInfo.activityType}, Duration: ${activityInfo.duration} mins, Date: ${activityInfo.date}, Calories Burned: ${activityInfo.caloriesBurned}")
             Spacer(modifier = Modifier.height(8.dp))
         }
 
@@ -58,5 +63,6 @@ fun ActivityScrollContent(navController: NavHostController, userId: String) {
         }) {
             Text("Back")
         }
+        Spacer(modifier = Modifier.height(60.dp))
     }
 }

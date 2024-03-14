@@ -1,6 +1,8 @@
 package com.cs125.group50.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -37,14 +39,17 @@ fun DietScrollContent(navController: NavHostController, userId: String) {
     }
     val dietInfoList by viewModel.dietInfoList.collectAsState()
 
-    Column(modifier = Modifier.padding(16.dp)) {
+    Column(modifier = Modifier
+        .verticalScroll(rememberScrollState())
+        .padding(16.dp)) {
+        Spacer(modifier = Modifier.height(48.dp))
         Text("Your Diet Information", style = MaterialTheme.typography.headlineMedium)
 
         Spacer(modifier = Modifier.height(16.dp))
 
         dietInfoList.forEach { dietInfo ->
             // Display each diet information here
-            Text("Date: ${dietInfo.date}, Time: ${dietInfo.time}, Meal Type: ${dietInfo.mealType}, Food Name: ${dietInfo.foodName}, Total calories: ${(dietInfo.foodAmount).toDouble()*(dietInfo.caloriesPerHundredGrams).toDouble()}")
+            Text("Date: ${dietInfo.date}, Time: ${dietInfo.time}, Meal Type: ${dietInfo.mealType}, Food Name: ${dietInfo.foodName}, Total calories: ${dietInfo.totalCalories}")
             Spacer(modifier = Modifier.height(8.dp))
         }
 
@@ -62,5 +67,6 @@ fun DietScrollContent(navController: NavHostController, userId: String) {
         }) {
             Text("Back")
         }
+        Spacer(modifier = Modifier.height(60.dp))
     }
 }

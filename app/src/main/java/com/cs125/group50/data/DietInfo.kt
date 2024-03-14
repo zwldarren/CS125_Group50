@@ -1,9 +1,13 @@
 package com.cs125.group50.data
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class DietInfo(
     val mealType: String,
     val foodName: String,
-    val caloriesPerHundredGrams: String,
+    val totalFat: String,
+    val totalCalories: String,
     val foodAmount: String,
     val date: String,
     val time: String

@@ -13,6 +13,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -23,6 +24,7 @@ import com.cs125.group50.nav.BaseScreen
 import com.cs125.group50.viewmodel.DashboardViewModel
 import com.cs125.group50.viewmodel.DashboardViewModelFactory
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
 
 @Composable
 fun MenuScreen(navController: NavHostController, userId: String, context: Context) {
@@ -36,9 +38,10 @@ fun MenuScreen(navController: NavHostController, userId: String, context: Contex
 }
 
 @Composable
-fun MenuScrollContent(navController: NavHostController, userId: String, context: Context){
+fun MenuScrollContent(navController: NavHostController, userId: String, context: Context) {
     val factory = DashboardViewModelFactory(context)
     val dashboardViewModel: DashboardViewModel = viewModel(factory = factory)
+    val coroutineScope = rememberCoroutineScope()
 
     val hasAllPermissions = dashboardViewModel.hasAllPermissions.collectAsState()
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -99,5 +102,35 @@ fun MenuScrollContent(navController: NavHostController, userId: String, context:
         ) {
             Text("Logout")
         }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = {
+                coroutineScope.launch {
+                    dashboardViewModel.synchronizeHealthData(context)
+                }
+            },
+            modifier = buttonModifier
+        ) {
+            Text("Synchronize Health Data")
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = {
+                coroutineScope.launch {
+                    dashboardViewModel.updateRecommendation()
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+        ) {
+            Text("Refresh Recommendations")
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }

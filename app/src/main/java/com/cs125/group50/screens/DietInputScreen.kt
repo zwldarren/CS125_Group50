@@ -28,7 +28,7 @@ fun DietInputScreen(navController: NavHostController, userId: String) {
     val context = LocalContext.current
     var mealType by remember { mutableStateOf("") }
     var foodName by remember { mutableStateOf("") }
-    var caloriesPerHundredGrams by remember { mutableStateOf("") }
+    var totalCalories by remember { mutableStateOf("") }
     var foodAmount by remember { mutableStateOf("") }
     val mealTypes = listOf("Breakfast", "Lunch", "Dinner", "Other")
     var expanded by remember { mutableStateOf(false) }
@@ -84,21 +84,13 @@ fun DietInputScreen(navController: NavHostController, userId: String) {
         Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedTextField(
-            value = caloriesPerHundredGrams,
-            onValueChange = { caloriesPerHundredGrams = it },
-            label = { Text("Calories per 100g") },
+            value = totalCalories,
+            onValueChange = { totalCalories = it },
+            label = { Text("totalCalories") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
-        Spacer(modifier = Modifier.height(8.dp))
 
-        OutlinedTextField(
-            value = foodAmount,
-            onValueChange = { foodAmount = it },
-            label = { Text("Food Amount (100g)") },
-            modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-        )
         Spacer(modifier = Modifier.height(16.dp))
 
         TextButton(onClick = { showDatePicker = true }) {
@@ -143,13 +135,11 @@ fun DietInputScreen(navController: NavHostController, userId: String) {
 
         Button(
             onClick = {
-                // 调用ViewModel来显示饮食信息，后续确定饮食相关的数据库结构后会修改成提示输入成功
-                viewModel.saveDietInfo(userId, mealType, foodName, caloriesPerHundredGrams, foodAmount, selectedDate, selectedTime)
+                viewModel.saveDietInfo(userId, mealType, foodName, totalCalories, "0", selectedDate, selectedTime)
                 navController.popBackStack()
-
             },
             // 检查所有字段是否填写
-            enabled = mealType.isNotEmpty() && foodName.isNotEmpty() && caloriesPerHundredGrams.isNotEmpty() && foodAmount.isNotEmpty()
+            enabled = mealType.isNotEmpty() && foodName.isNotEmpty() && totalCalories.isNotEmpty()
         ) {
             Text("Submit")
         }

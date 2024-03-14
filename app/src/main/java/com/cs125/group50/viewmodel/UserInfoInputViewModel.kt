@@ -10,12 +10,13 @@ import android.util.Log
 class UserInfoInputViewModel : ViewModel() {
     private val db = Firebase.firestore
 
-    fun saveUserInfo(userId: String, gender: String, height: Int, weight: Int, age: Int) {
+    fun saveUserInfo(userId: String, gender: String, height: Int, weight: Int, age: Int, goal: String) {
         val userInfo = hashMapOf(
             "gender" to gender,
             "height" to height,
             "weight" to weight,
-            "age" to age
+            "age" to age,
+            "goal" to goal
         )
 
         viewModelScope.launch {

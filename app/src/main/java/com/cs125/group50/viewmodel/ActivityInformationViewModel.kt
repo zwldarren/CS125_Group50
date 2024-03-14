@@ -1,25 +1,44 @@
 package com.cs125.group50.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cs125.group50.data.ActivityInfo
+import com.google.firebase.firestore.Query
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.tasks.await
 
 class ActivityInformationViewModel : ViewModel() {
-    private val _activityInfoList = MutableStateFlow<List<ActivityInfo>>(listOf(
-        // 示例数据，实际应用中应从数据库获取
-        ActivityInfo("Running", "30 minutes", "5 km"),
-        ActivityInfo("Swimming", "45 minutes", "1 km")
-    ))
+    private val db = Firebase.firestore
+    private val _activityInfoList = MutableStateFlow<List<ActivityInfo>>(emptyList())
     val activityInfoList: StateFlow<List<ActivityInfo>> = _activityInfoList
 
-    // 实际应用中，加载数据的逻辑会从数据库获取
-    fun loadActivityInfo() {
+    fun loadActivityInfo(userId: String) {
         viewModelScope.launch {
-            // 从数据库加载活动信息的逻辑
-            // 此处省略，因为示例中已经硬编码数据
+            try {
+                val documents = db.collection("users").document(userId).collection("activity")
+                    .orderBy("date", Query.Direction.DESCENDING) // sorted by date
+                    .limit(5)
+                    .get()
+                    .await() // 使用 Kotlin 协程的 await，确保已添加相应依赖
+
+                val activities = documents.map { document ->
+                    ActivityInfo(
+                        activityType = document.getString("activityType") ?: "",
+                        duration = document.getString("duration") ?: "",
+                        caloriesBurned = document.getString("caloriesBurned") ?: "",
+                        date = document.getString("date") ?: ""
+                    )
+                }
+                _activityInfoList.value = activities
+            } catch (e: Exception) {
+                Log.e("ActivityInfoVM", "Error loading activity info", e)
+                // Handle exception
+            }
         }
     }
 }
