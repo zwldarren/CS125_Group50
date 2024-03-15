@@ -1,3 +1,16 @@
+from datetime import datetime
+
+def get_current_season():
+    month = datetime.now().month
+    if 3 <= month <= 5:
+        return 'spring'
+    elif 6 <= month <= 8:
+        return 'summer'
+    elif 9 <= month <= 11:
+        return 'autumn'
+    else:
+        return 'winter'
+
 def calculate_bmr(weight, height, age, gender):
     if gender == 'male':
         bmr = (10 * weight + 6.25 * height - 5 * age + 5) * 1000
@@ -6,7 +19,7 @@ def calculate_bmr(weight, height, age, gender):
     return bmr
 
 
-def calculate_tdee(bmr, average_calories_burned_per_week):
+def calculate_tdee(bmr, average_calories_burned_per_week, season):
     # Considering that sports watches record including light activities like walking, the main criterion is the daily average calorie burn
     daily_average_calories_burned = average_calories_burned_per_week / 7
     if daily_average_calories_burned < 200000:
@@ -28,7 +41,15 @@ def calculate_tdee(bmr, average_calories_burned_per_week):
         'very_active': 1.9,
     }
 
-    return bmr * activity_factors[activity_level]
+    season_factors = {
+        'spring': 1.0,
+        'summer': 1.05,
+        'autumn': 1.0,
+        'winter': 1.1,
+    }
+
+    adjusted_tdee = bmr * activity_factors[activity_level] * season_factors[season]
+    return adjusted_tdee
 
 
 def calculate_score(tdee, calorie_intake, calorie_burn):
@@ -47,11 +68,12 @@ def calculate_score(tdee, calorie_intake, calorie_burn):
 
 def get_exercise_score(weight, height, age, gender, average_calories_burned_per_week, calorie_intake, calorie_burn):
     # Function to calculate the total score
+    season = get_current_season()
     bmr = calculate_bmr(weight, height, age, gender)
-    tdee = calculate_tdee(bmr, average_calories_burned_per_week)
+    tdee = calculate_tdee(bmr, average_calories_burned_per_week, season)
     fin_score, fin_calorie_difference = calculate_score(tdee, calorie_intake, calorie_burn)
     print(
-        f"in kcal: BMR: {bmr / 1000:.2f}, TDEE: {tdee / 1000:.2f}, last week: {average_calories_burned_per_week / 1000:.2f}, Score: {fin_score:.2f}, Calorie difference: {fin_calorie_difference / 1000:.2f}, calorie_intake: {calorie_intake / 1000:.2f}, calorie_burn: {calorie_burn / 1000:.2f}")
+        f"in kcal: BMR: {bmr / 1000:.2f}, TDEE: {tdee / 1000:.2f}, last week: {average_calories_burned_per_week / 1000:.2f}, Score: {fin_score:.2f}, Calorie difference: {fin_calorie_difference / 1000:.2f}, calorie_intake: {calorie_intake / 1000:.2f}, calorie_burn: {calorie_burn / 1000:.2f}, season: {season}")
     return fin_score, fin_calorie_difference
 
 
