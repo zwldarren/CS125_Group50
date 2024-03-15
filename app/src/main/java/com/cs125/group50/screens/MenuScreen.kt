@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -50,6 +51,10 @@ fun MenuScrollContent(navController: NavHostController, userId: String, context:
             dashboardViewModel.checkPermissions()
         }
     )
+
+    LaunchedEffect(Unit) { // This effect runs only once
+        dashboardViewModel.startPeriodicHealthDataSync(context)
+    }
 
     Column(
         modifier = Modifier

@@ -27,8 +27,10 @@ import com.cs125.group50.utils.ApiService
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import java.time.Duration
@@ -309,6 +311,15 @@ class DashboardViewModel(context: Context) : ViewModel() {
             } catch (e: Exception) {
                 Log.e("DashboardViewModel", "Error in updateRecommendation: ${e.message}", e)
                 errorMessage.value = "An unexpected error occurred."
+            }
+        }
+    }
+
+    fun startPeriodicHealthDataSync(context: Context) {
+        viewModelScope.launch {
+            while (isActive) { // Check if the coroutine is active
+                synchronizeHealthData(context)
+                delay(600000) // Wait for 10 minutes (600,000 milliseconds)
             }
         }
     }
