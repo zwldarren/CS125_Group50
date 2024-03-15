@@ -294,10 +294,10 @@ class DashboardViewModel(context: Context) : ViewModel() {
                 if (response.isSuccessful && response.body() != null) {
                     val recommendation = response.body()!!
                     val advice = buildString {
-                        append("Overall Score: ${recommendation.overallScore}\n")
-                        append("Exercise Score: ${recommendation.exerciseScore}\n")
-                        append("Diet Score: ${recommendation.dietScore}\n")
-                        append("Sleep Score: ${recommendation.sleepScore}\n\n")
+                        append("Overall Score: ${"%.2f".format(recommendation.overallScore)}\n")
+                        append("Exercise Score: ${"%.2f".format(recommendation.exerciseScore)}\n")
+                        append("Diet Score: ${"%.2f".format(recommendation.dietScore)}\n")
+                        append("Sleep Score: ${"%.2f".format(recommendation.sleepScore)}\n\n")
                         append("Overall advice: ${recommendation.overallResponse}\n")
                         append("Exercise advice: ${recommendation.exerciseResponse}\n")
                         append("Diet advice: ${recommendation.dietResponse}\n")
