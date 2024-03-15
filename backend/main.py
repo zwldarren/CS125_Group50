@@ -1,6 +1,9 @@
 from datetime import timedelta
+import re
 
+import configparser
 from fastapi import FastAPI, Path
+import requests
 import data
 import joblib
 from activity_processor import ActivityProcessor
@@ -23,8 +26,8 @@ from sleep_score import calculate_sleep_score
 app = FastAPI()
 
 sleep_model = joblib.load("train/model.joblib")
-
-
+config = configparser.ConfigParser()
+config.read("config.ini")
 # Run the server with the following command
 # uvicorn main:app --reload
 
@@ -42,6 +45,11 @@ async def synchronize_health_data(healthData: data.HealthData):
         exercise_records = healthData.exerciseRecord
         diet_records = healthData.dietRecords
         heart_rate_records = healthData.heartRateRecords
+
+        latitude, longitude = parse_location(healthData.location)
+        print(latitude, longitude)
+        print(config["OpenWeather"]["APIKey"])
+        weather = get_weather(latitude, longitude, config["OpenWeather"]["APIKey"])
 
         process_sleep_records(user_id, firebase_processor, sleep_records)
         process_exercise_records(user_id, firebase_processor, exercise_records)
@@ -204,3 +212,22 @@ def calculate_adjusted_time_difference(time1, time2):
     if difference_in_hours > 12:
         difference_in_hours = 24 - difference_in_hours
     return difference_in_hours
+
+def parse_location(location: str):
+    match = re.search(r"Location\[fused (\d+\.\d+),(-\d+\.\d+)", location)
+    if match:
+        latitude, longitude = match.groups()
+        latitude = float(latitude)
+        longitude = float(longitude)
+        return latitude, longitude
+
+
+def get_weather(latitude: float, longitude: float, api_key: str) -> dict:
+    """Fetch weather information using OpenWeatherMap API."""
+    url = f"https://api.openweathermap.org/data/2.5/weather?lat={latitude}&lon={longitude}&appid={api_key}"
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()["weather"][0]["main"]
+    else:
+        # raise Exception(f"Failed to get weather data: {response.status_code}")
+        print(f"Failed to get weather data: {response.status_code}")

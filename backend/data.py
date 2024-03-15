@@ -9,6 +9,7 @@ class HealthData(BaseModel):
     exerciseRecord: List
     dietRecords: List
     heartRateRecords: List
+    location: str
 
 
 class ResponseData(BaseModel):

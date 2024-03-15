@@ -9,4 +9,5 @@ data class HealthData(
     val exerciseRecord: List<ActivityInfo>,
     val dietRecords: List<DietInfo>,
     val heartRateRecords: List<HeartRateInfo>,
+    val location: String
 )

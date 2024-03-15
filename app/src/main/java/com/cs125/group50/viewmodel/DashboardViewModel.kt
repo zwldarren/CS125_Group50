@@ -1,6 +1,7 @@
 package com.cs125.group50.viewmodel
 
 import android.content.Context
+import android.location.Location
 import android.os.RemoteException
 import android.util.Log
 import android.widget.Toast
@@ -24,6 +25,10 @@ import com.cs125.group50.data.SleepInfo
 import com.cs125.group50.data.SleepStage
 import com.cs125.group50.data.UserInfo
 import com.cs125.group50.utils.ApiService
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -32,11 +37,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import retrofit2.Call
 import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 
 class DashboardViewModel(context: Context) : ViewModel() {
@@ -109,6 +117,34 @@ class DashboardViewModel(context: Context) : ViewModel() {
         }
     }
 
+
+    suspend fun getLocation(context: Context): Location? = suspendCancellableCoroutine { continuation ->
+        val fusedLocationProviderClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
+        val cancellationTokenSource = CancellationTokenSource()
+
+        try {
+            fusedLocationProviderClient.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, cancellationTokenSource.token)
+                .addOnSuccessListener { location: Location? ->
+                    // if successful, resume the coroutine with the location
+                    if (location != null) {
+                        continuation.resume(location)
+                    } else {
+                        continuation.resume(null)
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    continuation.resumeWithException(exception)
+                }
+
+        } catch (e: SecurityException) {
+            continuation.resumeWithException(e)
+        }
+
+        continuation.invokeOnCancellation {
+            cancellationTokenSource.cancel()
+        }
+    }
+
     suspend fun synchronizeHealthData(context: Context) {
         viewModelScope.launch {
             if (healthConnectManager.hasAllPermissions(requiredPermissions)) {
@@ -121,6 +157,8 @@ class DashboardViewModel(context: Context) : ViewModel() {
                 val totalCaloriesBurnedRecords = healthConnectManager.readTotalCaloriesBurnedRecords(startTime, endTime)
 //                val activeCaloriesBurnedRecord = healthConnectManager.readActiveCaloriesBurnedRecords(startTime, endTime)
 
+                val location = getLocation(context)
+//                val weatherInfo = getWeatherInfo(location)
 
                 // Converting records to data class instances
                 val activityInfos = healthConnectManager
@@ -180,6 +218,7 @@ class DashboardViewModel(context: Context) : ViewModel() {
                     exerciseRecord = activityInfos,
                     dietRecords = dietInfos,
                     heartRateRecords = heartRateInfos,
+                    location = location.toString()
                 )
                 val service = ApiService.getHealthDataService()
                 val call = service.synchronizeHealthData(dataToSend)
