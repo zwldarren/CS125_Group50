@@ -1,6 +1,9 @@
 from datetime import timedelta
+import re
 
+import configparser
 from fastapi import FastAPI, Path
+import requests
 import data
 import joblib
 from activity_processor import ActivityProcessor
@@ -23,6 +26,10 @@ from sleep_score import calculate_sleep_score
 app = FastAPI()
 
 sleep_model = joblib.load("train/model.joblib")
+config = configparser.ConfigParser()
+config.read("config.ini")
+
+user_weather_info = {}
 
 
 # Run the server with the following command
@@ -42,6 +49,12 @@ async def synchronize_health_data(healthData: data.HealthData):
         exercise_records = healthData.exerciseRecord
         diet_records = healthData.dietRecords
         heart_rate_records = healthData.heartRateRecords
+
+        latitude, longitude = parse_location(healthData.location)
+        print(latitude, longitude)
+        print(config["OpenWeather"]["APIKey"])
+        weather = get_weather(latitude, longitude, config["OpenWeather"]["APIKey"])
+        user_weather_info[user_id] = weather
 
         process_sleep_records(user_id, firebase_processor, sleep_records)
         process_exercise_records(user_id, firebase_processor, exercise_records)
@@ -152,7 +165,9 @@ async def update_recommendation(user_id):
         sleep_score = sum(item['sleepScore'] for item in sleep_infos) / len(sleep_infos)
         sleep_score = sleep_score / 10.0
 
-        exercise_score, calorie_difference = get_exercise_score(weight, height, age, gender, average_calories_burned_per_week, calorie_intake, calorie_burn)
+        exercise_score, calorie_difference = get_exercise_score(weight, height, age, gender,
+                                                                average_calories_burned_per_week, calorie_intake,
+                                                                calorie_burn)
 
         overall_score = calculate_overall_health_score(sleep_score, diet_score, exercise_score, goal)
         overall_recommendation = provide_final_recommendation(overall_score, goal)
@@ -172,12 +187,17 @@ async def update_recommendation(user_id):
         sleep_times_per_day = total_sleep_number / unique_dates
         average_sleep_per_day = (total_sleep_duration / unique_dates) / 60
 
-        sleep_recommendation = generate_sleep_advice(sleep_score, max_start_time_variance, sleep_times_per_day, average_sleep_per_day)
+        sleep_recommendation = generate_sleep_advice(sleep_score, max_start_time_variance, sleep_times_per_day,
+                                                     average_sleep_per_day)
 
         diet_recommendation = generate_diet_advice(diet_score, calorie_difference, extracted_hours_minutes)
 
         weekly_exercise_sessions_number = len(activity_info)
-        exercise_recommendation = generate_exercise_advice(exercise_score, weekly_exercise_sessions_number, calorie_difference)
+
+        current_weather = user_weather_info[user_id]
+
+        exercise_recommendation = generate_exercise_advice(exercise_score, weekly_exercise_sessions_number,
+                                                           calorie_difference, current_weather)
 
         return data.ResponseData(
             overallScore=overall_score,
@@ -189,10 +209,11 @@ async def update_recommendation(user_id):
             dietResponse=diet_recommendation,
             sleepResponse=sleep_recommendation
         )
-        
+
     except Exception as e:
         print(f"ERROR: {e}")
         return {"message": "Failed to generate recommendation"}
+
 
 def calculate_adjusted_time_difference(time1, time2):
     difference = time2 - time1
@@ -204,3 +225,23 @@ def calculate_adjusted_time_difference(time1, time2):
     if difference_in_hours > 12:
         difference_in_hours = 24 - difference_in_hours
     return difference_in_hours
+
+
+def parse_location(location: str):
+    match = re.search(r"Location\[fused (\d+\.\d+),(-\d+\.\d+)", location)
+    if match:
+        latitude, longitude = match.groups()
+        latitude = float(latitude)
+        longitude = float(longitude)
+        return latitude, longitude
+
+
+def get_weather(latitude: float, longitude: float, api_key: str) -> dict:
+    """Fetch weather information using OpenWeatherMap API."""
+    url = f"https://api.openweathermap.org/data/2.5/weather?lat={latitude}&lon={longitude}&appid={api_key}"
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()["weather"][0]["main"]
+    else:
+        # raise Exception(f"Failed to get weather data: {response.status_code}")
+        print(f"Failed to get weather data: {response.status_code}")

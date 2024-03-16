@@ -1,5 +1,11 @@
-def generate_exercise_advice(exercise_score, weekly_exercise_sessions, calorie_difference):
+def generate_exercise_advice(exercise_score, weekly_exercise_sessions, calorie_difference, weather):
     actions = {
+        "bad weather, exercise score less than 2": "Engage in gentle indoor activities such as stretching or yoga to maintain flexibility and promote relaxation. These low-impact exercises are perfect for beginners.",
+        "bad weather, exercise score between 2 and 4": "Explore home-based cardio workouts like jumping jacks, stair climbing, or dance fitness videos online. These exercises don't require much space or equipment and can effectively raise your heart rate.",
+        "bad weather, exercise score between 4 and 6": "Set up a home circuit training with bodyweight exercises such as push-ups, sit-ups, and lunges. Rotate between different activities for a comprehensive workout that builds strength and endurance.",
+        "bad weather, exercise score between 6 and 8": "If you have access to home gym equipment, focus on a balanced indoor workout combining cardio machines like stationary bikes or treadmills with strength training exercises using weights or resistance bands.",
+        "bad weather, exercise score between 8 and 10": "Challenge yourself with advanced indoor workouts such as high-intensity interval training (HIIT) sessions, advanced yoga flows, or martial arts drills. These activities will keep your training intense and engaging, ensuring you stay at peak fitness.",
+
         "low frequency, exercise score less than 2": "Focus on building a consistent exercise routine with light activities such as daily walks or gentle yoga. Aim for 15-20 minutes per session, 3 times a week to gradually increase your fitness level.",
         "low frequency, exercise score between 2 and 4": "Incorporate moderate aerobic exercises like brisk walking, swimming, or cycling. Start with sessions of 20-30 minutes, at least 3-4 times a week to build endurance and cardiovascular health.",
         "low frequency, exercise score between 4 and 6": "Enhance your routine with a mix of aerobic and strength training activities. Include exercises like running, bodyweight workouts, or resistance training for at least 30 minutes, 4-5 times a week.",
@@ -27,6 +33,24 @@ def generate_exercise_advice(exercise_score, weekly_exercise_sessions, calorie_d
     }
 
     advice = []
+
+    if weather == "Thunderstorm" or weather == "Rain" or weather == "Snow" or weather == "Drizzle":
+        weather_advice = "Given the current weather condition of " + weather + ", it's advisable to avoid outdoor activities. "
+        if exercise_score <= 2:
+            advice.append(weather_advice + actions["bad weather, exercise score less than 2"])
+        elif exercise_score <= 4:
+            advice.append(weather_advice + actions["bad weather, exercise score between 2 and 4"])
+        elif exercise_score <= 6:
+            advice.append(weather_advice + actions["bad weather, exercise score between 4 and 6"])
+        elif exercise_score <= 8:
+            advice.append(weather_advice + actions["bad weather, exercise score between 6 and 8"])
+        elif exercise_score <= 10:
+            advice.append(weather_advice + actions["bad weather, exercise score between 8 and 10"])
+        advice_string = ", ".join(advice)
+        return advice_string
+    else:
+        weather_advice = f"Current weather {weather} is suitable for outdoor exercise."
+        advice.append(weather_advice)
 
     if calorie_difference >= 2800000:
         if exercise_score <= 2:
